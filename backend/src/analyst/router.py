@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query
-from typing import List, Dict
+
+from backend.src.analyst.analyst import Analyst
+from backend.src.analyst.schemas import AnalyticsResponse, AssetPairsResponse, Kline
 from backend.src.analyst.utils import update_coin_symbol_name_map
 from backend.src.exchange_client.exchange_client_factory import ExchangeClientFactory
-from backend.src.analyst.analyst import Analyst
-from backend.src.analyst.schemas import AnalyticsResponse, Kline, AssetPairsResponse
 
 # APIRouter creates path operations for user module
 router = APIRouter(
@@ -14,7 +14,12 @@ router = APIRouter(
 
 
 @router.get("/symbol/klines/analysis", response_model=AnalyticsResponse)
-def get_symbol_analysis(exchange: str = Query(), symbol: str = Query(), interval: str = Query(), limit: int = Query()) -> AnalyticsResponse:
+def get_symbol_analysis(
+    exchange: str = Query(),
+    symbol: str = Query(),
+    interval: str = Query(),
+    limit: int = Query(),
+) -> AnalyticsResponse:
     client = ExchangeClientFactory.get_client(exchange)
     klines = client.get_klines(symbol, interval, limit)
     analyst = Analyst(klines)
@@ -26,8 +31,13 @@ def get_symbol_analysis(exchange: str = Query(), symbol: str = Query(), interval
         raise HTTPException(status_code=500, detail="Failed to calculate analyst's klines")
 
 
-@router.get("/asset/klines", response_model=List[Kline])
-def get_price_history(exchange: str = Query(), symbol: str = Query(), interval: str = Query(default="1d"), limit: int = Query(default=200)) -> List[Kline]:
+@router.get("/asset/klines", response_model=list[Kline])
+def get_price_history(
+    exchange: str = Query(),
+    symbol: str = Query(),
+    interval: str = Query(default="1d"),
+    limit: int = Query(default=200),
+) -> list[Kline]:
     client = ExchangeClientFactory.get_client(exchange)
     res = client.get_klines(symbol, interval, limit)
     if res:
@@ -46,8 +56,8 @@ def get_available_assets(exchange: str = Query(), quote_asset: str = Query(defau
         raise HTTPException(status_code=500, detail="Failed to get available coins")
 
 
-@router.put("/available_coins/symbol_name_map/update", response_model=Dict[str, str])
-def update_coin_symbol_name_map() -> Dict[str, str]:
+@router.put("/available_coins/symbol_name_map/update", response_model=dict[str, str])
+def update_coin_symbol_name_map() -> dict[str, str]:
     res = update_coin_symbol_name_map("coinmarketcap")
     if res:
         return {"Success": "Symbol - Name map updated Successfully"}

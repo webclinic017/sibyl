@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from backend.src.explorer.explorer import Explorer
 
+from backend.src.explorer.explorer import Explorer
 
 # APIRouter creates path operations for user module
 router = APIRouter(

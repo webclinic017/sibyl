@@ -1,8 +1,7 @@
-from typing import Dict, List
 from collections import defaultdict
 
 
-def invert_dict(original_dict: Dict[str, List[str]]) -> Dict[str, List[str]]:
+def invert_dict(original_dict: dict[str, list[str]]) -> dict[str, list[str]]:
     """
     Inverts a dictionary where the original values (lists) become keys,
     and the original keys become elements in new lists.
@@ -31,7 +30,7 @@ def invert_dict(original_dict: Dict[str, List[str]]) -> Dict[str, List[str]]:
             "BNB": ["BUSD"]
         }
     """
-    inverted: Dict[str, List[str]] = defaultdict(list)
+    inverted: dict[str, list[str]] = defaultdict(list)
 
     for key, values in original_dict.items():
         for value in values:

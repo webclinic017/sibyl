@@ -1,10 +1,14 @@
+import base64
+import hashlib
+import hmac
 import json
+import time
+from typing import Any
+
+import requests
 
 from backend.src.exchange_client.exchange_client import ExchangeAPIClient
 from database.api_keys_db_client import APIEncryptedDatabase
-import requests, time, hmac, hashlib, base64
-from typing import Dict, Any, Optional, Union, List
-import math
 
 
 class CoinbaseSandboxClient(ExchangeAPIClient):
@@ -15,15 +19,15 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
 
     def __init__(self):
         super().__init__()
-        self.name = 'coinbase_sandbox'
-        self.api_base_url = 'https://api-public.sandbox.exchange.coinbase.com'
-        self.coinbase_base_url = 'https://api.exchange.coinbase.com'
+        self.name = "coinbase_sandbox"
+        self.api_base_url = "https://api-public.sandbox.exchange.coinbase.com"
+        self.coinbase_base_url = "https://api.exchange.coinbase.com"
         # Set API Keys
         api_creds = APIEncryptedDatabase.get_api_key_by_name(self.name)
         if api_creds:
             self.api_key = api_creds.api_key
             self.api_secret = api_creds.secret_key
-            self.api_passphrase = api_creds.api_metadata # metadata contains the passphrase
+            self.api_passphrase = api_creds.api_metadata  # metadata contains the passphrase
         else:
             self.api_key = None
 
@@ -39,18 +43,19 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
         """
 
         if self.api_key is None:
-            return 'Empty Credentials'
+            return "Empty Credentials"
         try:
             acc = self.get_spot_balance()
             if "error" in acc.keys():
-                return 'Invalid Credentials'
+                return "Invalid Credentials"
             else:
-                return 'Active'
-        except Exception as e:
-            return 'Invalid Credentials'
+                return "Active"
+        except Exception:
+            return "Invalid Credentials"
 
-
-    def generate_request_headers(self, endpoint: str, method: str = 'GET', payload: Optional[dict] = None) -> Dict[str, str]:
+    def generate_request_headers(
+        self, endpoint: str, method: str = "GET", payload: dict | None = None
+    ) -> dict[str, str]:
         timestamp = str(int(time.time()))
 
         # Pre-signature string
@@ -70,12 +75,11 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
             "CB-ACCESS-SIGN": signature_b64,
             "CB-ACCESS-TIMESTAMP": timestamp,
             "CB-ACCESS-PASSPHRASE": self.api_passphrase,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
         return headers
 
-
-    def get_account_information(self) -> Dict[str, Any]:
+    def get_account_information(self) -> dict[str, Any]:
         """
         Fetches the account information from the exchange, including the commission rates
         (maker, taker, buyer, and seller) and the account's ability to perform trading,
@@ -95,15 +99,21 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
         **Returns:**
         - A dictionary with the account information or an error message.
         """
-        endpoint = '/fees'
+        endpoint = "/fees"
         headers = self.generate_request_headers(endpoint)
         response = requests.get(self.api_base_url + endpoint, headers=headers)
         res_dict = response.json()
-        return {"maker_commission": float(res_dict["maker_fee_rate"])*100, "taker_commission": float(res_dict["taker_fee_rate"])*100, "buyer_commission": "N/A", "seller_commission": "N/A",
-                "can_trade": "N/A", "can_deposit": "N/A", "can_withdraw": "N/A"}
+        return {
+            "maker_commission": float(res_dict["maker_fee_rate"]) * 100,
+            "taker_commission": float(res_dict["taker_fee_rate"]) * 100,
+            "buyer_commission": "N/A",
+            "seller_commission": "N/A",
+            "can_trade": "N/A",
+            "can_deposit": "N/A",
+            "can_withdraw": "N/A",
+        }
 
-
-    def get_spot_balance(self, quote_asset_pair_price: str = None) -> Dict[str, Any]:
+    def get_spot_balance(self, quote_asset_pair_price: str = None) -> dict[str, Any]:
         """
         Retrieve the user's spot balance, including free and locked amounts, along with current prices.
 
@@ -115,9 +125,9 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
             Dict[str, Any]: A dictionary containing spot balances, locked earn balances, staked balances, or an error message.
         """
         try:
-            endpoint = '/accounts'
+            endpoint = "/accounts"
             headers = self.generate_request_headers(endpoint)
-            response = requests.get(self.api_base_url+endpoint, headers=headers)
+            response = requests.get(self.api_base_url + endpoint, headers=headers)
 
             if response.status_code == 200:
                 accounts = response.json()
@@ -125,26 +135,39 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
                 balances = {}
                 for account in accounts:
                     if float(account["balance"]) > 0:
-
                         if quote_asset_pair_price:
-                            pair_price = self.get_pair_market_price(f"{account["currency"]}-{quote_asset_pair_price}")
+                            pair_price = self.get_pair_market_price(f"{account['currency']}-{quote_asset_pair_price}")
                             if pair_price is None:
                                 pair_price = 0.0
                         else:
                             pair_price = 0.0
-                        balances[account["currency"]] = {'free': float(account["balance"]), 'locked': 0.0 , 'price': float(pair_price)}
+                        balances[account["currency"]] = {
+                            "free": float(account["balance"]),
+                            "locked": 0.0,
+                            "price": float(pair_price),
+                        }
 
                 res_json = {
-                    'spot_balances': balances,
+                    "spot_balances": balances,
                 }
                 return res_json
             else:
-                return {"error": "Coinbase API status code {}".format(response.status_code)}
+                return {"error": f"Coinbase API status code {response.status_code}"}
         except Exception as e:
             return {"error": str(e)}
 
-
-    def place_spot_order(self, order_type: str, quote_asset: str, base_asset: str, side: str, quantity: float, price: Optional[float] = None, stop_price: Optional[float] = None, take_profit_price: Optional[float] = None, time_in_force: Optional[str] = None) -> Dict[str, Any]:
+    def place_spot_order(
+        self,
+        order_type: str,
+        quote_asset: str,
+        base_asset: str,
+        side: str,
+        quantity: float,
+        price: float | None = None,
+        stop_price: float | None = None,
+        take_profit_price: float | None = None,
+        time_in_force: str | None = None,
+    ) -> dict[str, Any]:
         """
         Places an order on Exchange based on the given parameters.
 
@@ -180,14 +203,14 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
 
             print(order_payload)
             if order_type.lower() == "limit":
-                if not price: # ValueError
+                if not price:  # ValueError
                     return {"error": "Limit orders require a price."}
                 order_payload["price"] = str(price)
                 if time_in_force:
                     order_payload["time_in_force"] = time_in_force.upper()
 
             elif order_type.lower() == "stop":
-                if not stop_price: # ValueError
+                if not stop_price:  # ValueError
                     return {"error": "Stop orders require a stop price."}
                 order_payload["stop_price"] = str(stop_price)
 
@@ -197,13 +220,26 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
             if response.status_code in [200, 201]:
                 return {"status": "success", "message": response.json()}
             else:
-                return {"status":"error", "message": f"Failed to place order: {response.text}"}
+                return {
+                    "status": "error",
+                    "message": f"Failed to place order: {response.text}",
+                }
 
         except Exception as e:
-            return {"status":"error", "message": f"Exception occurred: {str(e)}"}
+            return {"status": "error", "message": f"Exception occurred: {e!s}"}
 
-
-    def place_spot_test_order(self, order_type: str, quote_asset: str, base_asset: str, side: str, quantity: float, price: Optional[float] = None, stop_price: Optional[float] = None, take_profit_price: Optional[float] = None, time_in_force: Optional[str] = None) -> Dict[str, str]:
+    def place_spot_test_order(
+        self,
+        order_type: str,
+        quote_asset: str,
+        base_asset: str,
+        side: str,
+        quantity: float,
+        price: float | None = None,
+        stop_price: float | None = None,
+        take_profit_price: float | None = None,
+        time_in_force: str | None = None,
+    ) -> dict[str, str]:
         """
         Same as place_spot_order but to test if the trade is possible.
 
@@ -212,10 +248,12 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
                 - status: 'success' or 'error'
                 - message: Empty '' in case of success, Error message in case of error.
         """
-        return {"status": "success", "message": "Coinbase API does not support test orders. Skipping this step."}
+        return {
+            "status": "success",
+            "message": "Coinbase API does not support test orders. Skipping this step.",
+        }
 
-
-    def get_available_assets(self, quote_asset: str = "all") -> Optional[Dict[str, List[str]]]:
+    def get_available_assets(self, quote_asset: str = "all") -> dict[str, list[str]] | None:
         """
         Fetches available trading pairs from Coinbase and groups them by quote asset.
 
@@ -242,7 +280,7 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
                 data = response.json()
 
                 # Dictionary to store quote assets and their corresponding base assets
-                assets_by_quote: Dict[str, List[str]] = {}
+                assets_by_quote: dict[str, list[str]] = {}
 
                 for product in data:
                     base_currency = product["base_currency"]
@@ -266,8 +304,14 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
             print(f"Error fetching available assets: {e}")
             return None
 
-
-    def get_klines(self, symbol: str, interval: str, limit: int, start_time: int = None, end_time: int = None) -> Optional[List[Dict[str, float]]]:
+    def get_klines(
+        self,
+        symbol: str,
+        interval: str,
+        limit: int,
+        start_time: int = None,
+        end_time: int = None,
+    ) -> list[dict[str, float]] | None:
         """
         Fetches historical OHLCV data for a given symbol from the client.
 
@@ -284,8 +328,7 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
         """
         pass
 
-
-    def get_symbol_info(self, symbol: str) -> Dict[str, Any] | None:
+    def get_symbol_info(self, symbol: str) -> dict[str, Any] | None:
         """
         Retrieves information about a specific symbol pair.
 
@@ -325,7 +368,7 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
                     "base_precision": float(data["base_increment"]),
                     "quote_precision": float(data["quote_increment"]),
                     "order_types": ["LIMIT", "MARKET"],  # temp solution
-                    "min_trade_value": float(data.get("min_market_funds", -1))
+                    "min_trade_value": float(data.get("min_market_funds", -1)),
                 }
                 return res_dict
 
@@ -334,8 +377,7 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
             print(f"Unexpected error: {e}")
             return None
 
-
-    def get_minimum_trade_value(self, symbol: str) -> Optional[Dict[str, Union[float, str]]]:
+    def get_minimum_trade_value(self, symbol: str) -> dict[str, float | str] | None:
         """
         Retrieves the minimum trade value required for a given trading pair.
 
@@ -362,12 +404,11 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
                 min_trade_size = float(data.get("min_market_funds", -1))
                 return {"min_trade_value": min_trade_size}
 
-            return None # {"error": f"Symbol {symbol} not found or invalid"}
+            return None  # {"error": f"Symbol {symbol} not found or invalid"}
 
         except Exception as e:
             print(f"Error fetching minimum trade value: {e}")
             return None
-
 
     def get_pair_market_price(self, pair_symbol: str) -> float | None:
         """
@@ -390,7 +431,6 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
             print(f"Error fetching current asset price: {e}")
             return None
 
-
     def add_spot_order_to_trade_history_db(self, quote_asset: str, base_asset: str, trade_dict: dict) -> bool:
         """
         Function add the successful spot trade order to the trade history DB using the TradeHistoryDBClient
@@ -403,8 +443,7 @@ class CoinbaseSandboxClient(ExchangeAPIClient):
         """
         pass
 
-
-    def get_orderbook(self, quote_asset: str, base_asset: str, limit: int) ->Optional[List[List[Dict[str, float]]]]:
+    def get_orderbook(self, quote_asset: str, base_asset: str, limit: int) -> list[list[dict[str, float]]] | None:
         """
         Fetches the order book for a given trading pair from Exchange API and formats the data.
 

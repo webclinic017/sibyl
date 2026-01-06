@@ -1,5 +1,6 @@
+from typing import Any
+
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
 
 
 class SpotTradeRequest(BaseModel):
@@ -9,16 +10,15 @@ class SpotTradeRequest(BaseModel):
     base_asset: str
     side: str
     quantity: float
-    price: Optional[float] = None
-    stop_price: Optional[float] = None
-    take_profit_price: Optional[float] = None
-    time_in_force: Optional[str] = None
+    price: float | None = None
+    stop_price: float | None = None
+    take_profit_price: float | None = None
+    time_in_force: str | None = None
 
 
 class SpotTradeResponse(BaseModel):
     status: str
     message: str
-
 
 
 class StrategyRequest(BaseModel):
@@ -30,4 +30,4 @@ class StrategyRequest(BaseModel):
     strategy: str
     num_trades: int
     dataset_size: int
-    params: Dict[str, Any]  # Holds strategy-specific parameters
+    params: dict[str, Any]  # Holds strategy-specific parameters

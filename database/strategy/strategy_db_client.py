@@ -1,8 +1,8 @@
-from tinydb import TinyDB, Query
-from datetime import datetime
-from dotenv import load_dotenv
 import os
-from typing import Optional, List, Dict, Any
+from typing import Any
+
+from dotenv import load_dotenv
+from tinydb import Query, TinyDB
 
 
 class StrategyDBClient:
@@ -10,7 +10,7 @@ class StrategyDBClient:
     A class to interact with the TinyDB database for storing and retrieving strategy results.
     """
 
-    def __init__(self, db_path_env: str = 'database/db_paths.env') -> None:
+    def __init__(self, db_path_env: str = "database/db_paths.env") -> None:
         """
         Initializes the database connection.
 
@@ -20,12 +20,21 @@ class StrategyDBClient:
         db_path = os.getenv("STRATEGY_DB_PATH")
         if not db_path:
             raise ValueError("Database path not found in environment variables.")
-        self.db = TinyDB(db_path) # will be created if it doesnt exist
+        self.db = TinyDB(db_path)  # will be created if it doesnt exist
         self.logs_table = self.db.table("logs")
         self.metadata_table = self.db.table("strategies")
 
-
-    def add_strategy(self, strategy_id: str, quote_asset: str, base_asset: str, quote_amount: float, time_interval: str, trades_limit: int, strategy_name: str, created_at: int ) -> None:
+    def add_strategy(
+        self,
+        strategy_id: str,
+        quote_asset: str,
+        base_asset: str,
+        quote_amount: float,
+        time_interval: str,
+        trades_limit: int,
+        strategy_name: str,
+        created_at: int,
+    ) -> None:
         """
         Adds metadata for a strategy.
 
@@ -38,19 +47,27 @@ class StrategyDBClient:
         :param strategy_name: The name of the strategy.
         :param created_at: The time the strategy was created.
         """
-        self.metadata_table.insert({
-            "strategy_id": strategy_id,
-            "quote_asset": quote_asset,
-            "base_asset": base_asset,
-            "quote_amount": quote_amount,
-            "time_interval": time_interval,
-            "trades_limit": trades_limit,
-            "strategy_name": strategy_name,
-            "created_at": created_at
-        })
+        self.metadata_table.insert(
+            {
+                "strategy_id": strategy_id,
+                "quote_asset": quote_asset,
+                "base_asset": base_asset,
+                "quote_amount": quote_amount,
+                "time_interval": time_interval,
+                "trades_limit": trades_limit,
+                "strategy_name": strategy_name,
+                "created_at": created_at,
+            }
+        )
 
-
-    def add_log(self, strategy_id: str, timestamp: int, price: float, slippage: float, order: str) -> None:
+    def add_log(
+        self,
+        strategy_id: str,
+        timestamp: int,
+        price: float,
+        slippage: float,
+        order: str,
+    ) -> None:
         """
         Adds a log entry to the database for a given strategy.
 
@@ -60,14 +77,15 @@ class StrategyDBClient:
         :param slippage: Slippage of the Order (Order Price - Price which was used to make the decision.).
         :param order: Type of order executed (e.g., 'buy', 'sell').
         """
-        self.logs_table.insert({
-            "strategy_id": strategy_id,
-            "timestamp": timestamp,
-            "price": price,
-            "slippage": slippage,
-            "order": order,
-        })
-
+        self.logs_table.insert(
+            {
+                "strategy_id": strategy_id,
+                "timestamp": timestamp,
+                "price": price,
+                "slippage": slippage,
+                "order": order,
+            }
+        )
 
     # def get_logs(self, strategy_id: str, timestamp: Optional[str] = None) -> List[Dict[str, Any]]:
     #     """
@@ -89,7 +107,7 @@ class StrategyDBClient:
     #
     #     return results
 
-    def get_logs(self, strategy_id: str, timestamp: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_logs(self, strategy_id: str, timestamp: int | None = None) -> list[dict[str, Any]]:
         """
         Retrieves strategy results. If a timestamp is provided, it returns all results from that timestamp onward.
 
@@ -112,7 +130,7 @@ class StrategyDBClient:
 
         return results
 
-    def get_latest_log_price(self, strategy_name: str) -> Optional[float]:
+    def get_latest_log_price(self, strategy_name: str) -> float | None:
         """
         Retrieves the most recent price for a given strategy.
 
@@ -122,8 +140,7 @@ class StrategyDBClient:
         results = self.get_logs(strategy_name)
         return results[-1]["price"] if results else None
 
-
-    def get_strategy_metadata(self, strategy_id: str) -> Optional[Dict[str, Any]]:
+    def get_strategy_metadata(self, strategy_id: str) -> dict[str, Any] | None:
         """
         Retrieves metadata for a strategy.
         """
@@ -131,8 +148,7 @@ class StrategyDBClient:
         results = self.metadata_table.search(strategy.strategy_id == strategy_id)
         return results[0] if results else None
 
-
-    def get_all_strategies(self) -> List[Dict[str, Any]]:
+    def get_all_strategies(self) -> list[dict[str, Any]]:
         """
         Retrieves metadata for all strategies.
 

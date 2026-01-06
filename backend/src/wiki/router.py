@@ -1,12 +1,12 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from grpc import insecure_channel
-from backend.config import inference_pb2
-from backend.config import inference_pb2_grpc
-from backend.src.wiki.utils import check_exists_chroma_db, check_exists_llm_api
-from dotenv import load_dotenv
-import os
-from typing import Optional
+
+from backend.config import inference_pb2, inference_pb2_grpc
 from backend.src.wiki.schemas import VectorStoreStatusResponse, WikiAgentResponse
+from backend.src.wiki.utils import check_exists_chroma_db
 
 # APIRouter creates path operations for user module
 router = APIRouter(
@@ -17,18 +17,24 @@ router = APIRouter(
 
 
 @router.get("/chatbot/query", response_model=WikiAgentResponse)
-def get_wiki_agent_response(model_source: str, model_type: str, query: str, model_name: Optional[str] = None, agent_type: str = "wiki_agent"):
+def get_wiki_agent_response(
+    model_source: str,
+    model_type: str,
+    query: str,
+    model_name: str | None = None,
+    agent_type: str = "wiki_agent",
+):
     try:
         # Call gRPC server
-        load_dotenv('llm_gateway/server_config.env')
-        channel = insecure_channel(f"{os.getenv("GRPC_INFERENCE_SERVER_IP")}:{os.getenv("GRPC_INFERENCE_SERVER_PORT")}")
+        load_dotenv("llm_gateway/server_config.env")
+        channel = insecure_channel(f"{os.getenv('GRPC_INFERENCE_SERVER_IP')}:{os.getenv('GRPC_INFERENCE_SERVER_PORT')}")
         stub = inference_pb2_grpc.InferenceServiceStub(channel)
 
         kwargs = {
             "application": agent_type,
             "model_source": model_source,
             "model_type": model_type,
-            "input_text": query
+            "input_text": query,
         }
         if model_name:
             kwargs["model_name"] = model_name
@@ -40,7 +46,6 @@ def get_wiki_agent_response(model_source: str, model_type: str, query: str, mode
     except Exception as e:
         print(e)
         raise HTTPException(status_code=404, detail="LLM API failed")
-
 
 
 # @router.get("/chatbot/query")

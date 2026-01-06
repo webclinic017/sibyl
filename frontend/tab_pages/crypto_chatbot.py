@@ -1,12 +1,17 @@
-import streamlit as st
-from frontend.src.utils.ui_elements import fix_page_layout, set_page_title
-from frontend.src.utils.wiki_helper.client import fetch_wiki_rag_response, fetch_vectorstore_status
 import time
+
+import streamlit as st
+
 from frontend.db.db_connector import fetch_llm_config
+from frontend.src.utils.ui_elements import fix_page_layout, set_page_title
+from frontend.src.utils.wiki_helper.client import (
+    fetch_vectorstore_status,
+    fetch_wiki_rag_response,
+)
 
-
-fix_page_layout('💬 Chatbot')
+fix_page_layout("💬 Chatbot")
 set_page_title("Crypto Wiki Chatbot 💬")
+
 
 @st.dialog(title="Crypto Wiki AI Agent RAG System", width="large")
 def show_info():
@@ -27,36 +32,73 @@ def show_info():
         **Step 5: LLM Completion for Final Answer**\n
         Instead of returning the document as-is, we format it into a prompt and send it to an LLM (e.g., GPT-4, Mistral, or Llama-3 via Hugging Face API).""")
 
+
 with st.expander("✏️ Instructions"):
-    st.write("This crypto chatbot is based on a **RAG** system which contains multiple documents related to crypto (whitepapers, technical details, articles etc.). In order to use this functionality, 1. the **Embeddings Database** (chromadb) needs to be downloaded locally in the */database/wiki_rag* directory and 2. have a **valid API key** for Hugging Face, OpenAI API or Google's gemini stored in the encrypted Database.")
-    if st.button('ℹ️ Learn more'):
+    st.write(
+        "This crypto chatbot is based on a **RAG** system which contains multiple documents related to crypto (whitepapers, technical details, articles etc.). In order to use this functionality, 1. the **Embeddings Database** (chromadb) needs to be downloaded locally in the */database/wiki_rag* directory and 2. have a **valid API key** for Hugging Face, OpenAI API or Google's gemini stored in the encrypted Database."
+    )
+    if st.button("ℹ️ Learn more"):
         show_info()
 
 vectorstore_status = fetch_vectorstore_status()
 oracle_status = fetch_llm_config()
 
 if not vectorstore_status:
-    st.warning("**Embeddings Database** was not found on your filesystem.", icon=":material/warning_alt:")
+    st.warning(
+        "**Embeddings Database** was not found on your filesystem.",
+        icon=":material/warning_alt:",
+    )
     st.button("Download Wiki RAG Database", icon=":material/download:", type="primary")
 else:
-    st.sidebar.badge("**Embeddings Database** is configured", icon=":material/database:", color="green")
+    st.sidebar.badge(
+        "**Embeddings Database** is configured",
+        icon=":material/database:",
+        color="green",
+    )
 
 if not oracle_status:
-    st.warning("**Oracle** is not configured, so the LLM functionality of the Wiki Chatbot is not available.", icon=":material/warning_alt:")
-    st.link_button("Setup Oracle in Settings", "http://localhost:8501/settings", type="primary", icon=":material/settings:")
+    st.warning(
+        "**Oracle** is not configured, so the LLM functionality of the Wiki Chatbot is not available.",
+        icon=":material/warning_alt:",
+    )
+    st.link_button(
+        "Setup Oracle in Settings",
+        "http://localhost:8501/settings",
+        type="primary",
+        icon=":material/settings:",
+    )
 else:
-    st.sidebar.badge("**Oracle** is configured", icon=":material/local_fire_department:", color="green")
+    st.sidebar.badge(
+        "**Oracle** is configured",
+        icon=":material/local_fire_department:",
+        color="green",
+    )
 
 if vectorstore_status and oracle_status:
-    agent_type = st.sidebar.toggle("Wiki AI Agent", value=True, help="If this option is enabled the Wiki AI Agent will be used, otherwise a straightforward RAG LLM-powered algorithm will be used.")
+    agent_type = st.sidebar.toggle(
+        "Wiki AI Agent",
+        value=True,
+        help="If this option is enabled the Wiki AI Agent will be used, otherwise a straightforward RAG LLM-powered algorithm will be used.",
+    )
 
 st.html("""<hr style="height:1px; color:#e3e3e3; background-color:#e3e3e3; padding:0; margin:0;">""")
 
 if "wiki_chatbot_messages" in st.session_state:
-    if st.sidebar.button("Reset Chat", icon=":material/backspace:", type="primary", use_container_width=True):
+    if st.sidebar.button(
+        "Reset Chat",
+        icon=":material/backspace:",
+        type="primary",
+        use_container_width=True,
+    ):
         del st.session_state["wiki_chatbot_messages"]
 else:
-    st.sidebar.button("Reset Chat", icon=":material/backspace:", type="primary", use_container_width=True, disabled=True)
+    st.sidebar.button(
+        "Reset Chat",
+        icon=":material/backspace:",
+        type="primary",
+        use_container_width=True,
+        disabled=True,
+    )
 
 
 if "wiki_chatbot_messages" not in st.session_state:
@@ -75,7 +117,13 @@ if user_input := st.chat_input("What would you like to know?"):
     # RESPONSE ELEMENT
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            bot_response = fetch_wiki_rag_response(model_source=oracle_status["llm_source"], model_type=oracle_status["llm_type"], model_name=oracle_status["llm_name"], query=user_input, agent_type=agent_type)
+            bot_response = fetch_wiki_rag_response(
+                model_source=oracle_status["llm_source"],
+                model_type=oracle_status["llm_type"],
+                model_name=oracle_status["llm_name"],
+                query=user_input,
+                agent_type=agent_type,
+            )
         response_placeholder = st.empty()
         displayed_text = ""
         for word in bot_response.split(" "):

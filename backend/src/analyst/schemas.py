@@ -1,6 +1,6 @@
-from typing import List, Optional, Dict
-from pydantic import BaseModel, Field, validator, RootModel
 import math
+
+from pydantic import BaseModel, Field, RootModel, validator
 
 
 class Kline(BaseModel):
@@ -9,7 +9,10 @@ class Kline(BaseModel):
     high: float = Field(..., description="Highest price in the interval")
     low: float = Field(..., description="Lowest price in the interval")
     close_price: float = Field(..., description="Closing price")
-    close_time: float = Field(..., description="Closing time as Unix timestamp in milliseconds (float in example)")
+    close_time: float = Field(
+        ...,
+        description="Closing time as Unix timestamp in milliseconds (float in example)",
+    )
     volume: float = Field(..., description="Trading volume during the interval")
     trades_num: float = Field(..., description="Number of trades executed during the interval")
 
@@ -20,21 +23,26 @@ class AnalyticsKline(BaseModel):
     high: float = Field(..., description="Highest price in the interval")
     low: float = Field(..., description="Lowest price in the interval")
     close_price: float = Field(..., description="Closing price")
-    close_time: float = Field(..., description="Closing time as Unix timestamp in milliseconds (float in example)")
+    close_time: float = Field(
+        ...,
+        description="Closing time as Unix timestamp in milliseconds (float in example)",
+    )
     volume: float = Field(..., description="Trading volume during the interval")
     trades_num: float = Field(..., description="Number of trades executed during the interval")
-    Moving_Average: Optional[float] = Field(..., alias="Moving Average", description="Calculated moving average for the interval")
-    RSI: Optional[float] = Field(..., description="Relative Strength Index value")
-    LowerBand: Optional[float] = Field(..., description="Lower Bollinger Band value")
-    UpperBand: Optional[float] = Field(..., description="Upper Bollinger Band value")
+    Moving_Average: float | None = Field(
+        ...,
+        alias="Moving Average",
+        description="Calculated moving average for the interval",
+    )
+    RSI: float | None = Field(..., description="Relative Strength Index value")
+    LowerBand: float | None = Field(..., description="Lower Bollinger Band value")
+    UpperBand: float | None = Field(..., description="Upper Bollinger Band value")
 
-
-    @validator('RSI', 'LowerBand', 'UpperBand', pre=True, always=True)
+    @validator("RSI", "LowerBand", "UpperBand", pre=True, always=True)
     def convert_nan_to_none(cls, v):
         if isinstance(v, float) and math.isnan(v):
             return None
         return v
-
 
     class Config:
         populate_by_name = True
@@ -57,9 +65,9 @@ class AnalyticsKline(BaseModel):
 
 
 class AnalyticsResponse(BaseModel):
-    klines: List[AnalyticsKline]
+    klines: list[AnalyticsKline]
     score: float = Field(..., description="Overall score as a floating point number")
 
 
 class AssetPairsResponse(RootModel):
-    root: Dict[str, List[str]]
+    root: dict[str, list[str]]

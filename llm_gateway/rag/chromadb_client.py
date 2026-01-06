@@ -1,17 +1,17 @@
 import hashlib
-import uuid
-import chromadb
-from chromadb.utils import embedding_functions
-from sentence_transformers import SentenceTransformer, CrossEncoder
-from typing import List, Dict, Any, Union
-import numpy as np
-import faiss
-import random
-from rank_bm25 import BM25Okapi
-from llm_gateway.llm_models.llm_base import LLMBase
-import pickle
 import os
+import pickle
+import random
+import uuid
+from typing import Any
+
+import chromadb
+import numpy as np
 from dotenv import load_dotenv
+from rank_bm25 import BM25Okapi
+from sentence_transformers import CrossEncoder, SentenceTransformer
+
+from llm_gateway.llm_models.llm_base import LLMBase
 
 
 class ChromaDBClient:
@@ -27,7 +27,7 @@ class ChromaDBClient:
         :param collection_name: Name of the collection to use.
         """
 
-        load_dotenv('database/db_paths.env')
+        load_dotenv("database/db_paths.env")
         self.vectorstore_path = os.getenv("WIKI_VECTORSTORE_PATH")
 
         self.chroma_client = chromadb.PersistentClient(path=self.vectorstore_path)
@@ -55,7 +55,8 @@ class ChromaDBClient:
             "No luck this time! Want to ask differently?",
             "I searched, but nothing came up. Try again?",
             "That's a tricky one! Maybe another phrasing?",
-            "Nothing found. Let’s give it another shot!"]
+            "Nothing found. Let’s give it another shot!",
+        ]
 
         # LLM that provides the final response
         self.llm = llm
@@ -66,8 +67,7 @@ class ChromaDBClient:
         """Generate a unique and consistent ID based on document text."""
         return str(uuid.uuid5(uuid.NAMESPACE_DNS, hashlib.sha256(text.encode()).hexdigest()))
 
-
-    def add_documents(self, documents: List[Dict[str, str]]) -> None:
+    def add_documents(self, documents: list[dict[str, str]]) -> None:
         """
         Batch Processing: Add documents and their embeddings to the collection.
         Metadata:
@@ -89,12 +89,14 @@ class ChromaDBClient:
                 existing_ids.append(new_id)
                 texts.append(doc["text"])
                 ids.append(new_id)
-                metadatas.append({
-                    "title": doc["title"],
-                    "type": doc["type"],
-                    "href": doc["href"],
-                    "page_num": doc["page_num"],
-                })
+                metadatas.append(
+                    {
+                        "title": doc["title"],
+                        "type": doc["type"],
+                        "href": doc["href"],
+                        "page_num": doc["page_num"],
+                    }
+                )
 
         if len(texts) > 0:
             # Generate embeddings
@@ -111,7 +113,6 @@ class ChromaDBClient:
             # self.faiss_index.add(np.array(embeddings).astype("float32"))
             # self.documents.extend(documents)
 
-
             # # Update BM25 retriever
             # tokenized_corpus = [doc["text"].lower().split() for doc in documents]
             # self.bm25 = BM25Okapi(tokenized_corpus)
@@ -126,10 +127,10 @@ class ChromaDBClient:
         Load the BM25 model and documents from a file for persistence.
         """
         try:
-            with open(self.bm25_path, 'rb') as file:
+            with open(self.bm25_path, "rb") as file:
                 data = pickle.load(file)
-                self.tokenized_docs = data.get('tokenized_docs', [])
-                self.documents = data.get('documents', [])
+                self.tokenized_docs = data.get("tokenized_docs", [])
+                self.documents = data.get("documents", [])
                 # Initialize BM25 with the existing tokenized documents
                 self.bm25 = BM25Okapi(self.tokenized_docs)
                 print("BM25 model loaded from file.")
@@ -141,14 +142,10 @@ class ChromaDBClient:
         """
         Save the current BM25 model and documents to a file for persistence.
         """
-        with open(self.bm25_path, 'wb') as file:
-            data = {
-                'tokenized_docs': self.tokenized_docs,
-                'documents': self.documents
-            }
+        with open(self.bm25_path, "wb") as file:
+            data = {"tokenized_docs": self.tokenized_docs, "documents": self.documents}
             pickle.dump(data, file)
             print("BM25 model saved to file.")
-
 
     def collection_size(self) -> int:
         """
@@ -158,7 +155,7 @@ class ChromaDBClient:
         """
         return self.collection.count()
 
-    def similarity_search(self, query: str, n_results: int = 5) -> List[Dict[str, str]]:
+    def similarity_search(self, query: str, n_results: int = 5) -> list[dict[str, str]]:
         """
         Perform a similarity search using embeddings.
 
@@ -169,18 +166,28 @@ class ChromaDBClient:
 
         query_embedding = self.embedding_model.encode([query]).tolist()
         results = self.collection.query(
-            query_embeddings=query_embedding, n_results=n_results, include=["documents", "metadatas"]
+            query_embeddings=query_embedding,
+            n_results=n_results,
+            include=["documents", "metadatas"],
         )
 
         # Format results
         matches = []
         if results.get("documents"):
-            for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
-                matches.append({"text": doc, "title": meta["title"], "type": meta["type"], "href": meta["href"], "page_num": meta["page_num"]})
+            for doc, meta in zip(results["documents"][0], results["metadatas"][0], strict=False):
+                matches.append(
+                    {
+                        "text": doc,
+                        "title": meta["title"],
+                        "type": meta["type"],
+                        "href": meta["href"],
+                        "page_num": meta["page_num"],
+                    }
+                )
 
         return matches
 
-    def hybrid_search(self, query: str, top_k: int = 3, relevance_threshold: float = 0.5) -> Union[str, Dict[str, Any]]:
+    def hybrid_search(self, query: str, top_k: int = 3, relevance_threshold: float = 0.5) -> str | dict[str, Any]:
         """
         Performs hybrid retrieval using ChromaDB, FAISS, and BM25.
         Then reranks results and filters out low-confidence matches.
@@ -190,25 +197,27 @@ class ChromaDBClient:
         :param relevance_threshold: Minimum reranker score to accept a result.
         :return: Best-matching document or a message if no relevant information is found.
         """
-        query_embedding: List[float] = self.embedding_model.encode(query).tolist()
+        query_embedding: list[float] = self.embedding_model.encode(query).tolist()
 
         # Step 1: Retrieve top-K results from ChromaDB (vector search)
         results = self.collection.query(
-            query_embeddings=[query_embedding], n_results=top_k, include=["documents", "metadatas", "distances"]
+            query_embeddings=[query_embedding],
+            n_results=top_k,
+            include=["documents", "metadatas", "distances"],
         )
 
         # Step 2: FAISS Approximate Nearest Neighbor search
         _, faiss_indices = self.faiss_index.search(np.array([query_embedding]).astype("float32"), top_k)
-        faiss_results: List[str] = [self.documents[i]["text"] for i in faiss_indices[0]]
+        faiss_results: list[str] = [self.documents[i]["text"] for i in faiss_indices[0]]
 
         # Step 3: BM25 keyword-based retrieval
         bm25_scores = self.bm25.get_scores(query.lower().split())
         bm25_top_indices = np.argsort(bm25_scores)[-top_k:][::-1]
-        bm25_results: List[str] = [self.documents[i]["text"] for i in bm25_top_indices]
+        bm25_results: list[str] = [self.documents[i]["text"] for i in bm25_top_indices]
 
         # Step 4: Merge results from all retrieval methods
-        merged_results: List[str] = list(set(results["documents"][0] + faiss_results + bm25_results))
-        merged_metadata: List[Dict[str, str]] = results["metadatas"][0]
+        merged_results: list[str] = list(set(results["documents"][0] + faiss_results + bm25_results))
+        merged_metadata: list[dict[str, str]] = results["metadatas"][0]
 
         if not merged_results:
             return random.choice(self.not_found_responses)
@@ -233,8 +242,7 @@ class ChromaDBClient:
             "score": best_match_score,
         }
 
-
-    def hybrid_similarity_search(self, query: str, n_results: int = 5) -> List[Dict[str, str]]:
+    def hybrid_similarity_search(self, query: str, n_results: int = 5) -> list[dict[str, str]]:
         """
         Perform a hybrid search using both embeddings and BM25 for better relevance.
 
@@ -261,7 +269,6 @@ class ChromaDBClient:
 
         return hybrid_results
 
-
     def run(self, question: str) -> str:
         """
         Sends a user query and retrieved context to a Hugging Face-hosted LLM API.
@@ -276,7 +283,7 @@ class ChromaDBClient:
         sources = ""
         for doc in nearest_docs:
             context += doc["text"]
-            sources += f"- {doc["type"]} (page: {doc["page_num"]}): {doc['title']} | {doc['href']}\n"
+            sources += f"- {doc['type']} (page: {doc['page_num']}): {doc['title']} | {doc['href']}\n"
 
         prompt = f"""
             You are a knowledgeable AI assistant specialized in cryptocurrency, blockchain, and crypto technology. 

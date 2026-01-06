@@ -1,25 +1,26 @@
-import os, sys
+import os
+import sys
+
 # Environment Check
 script_path = os.path.abspath(os.path.dirname(__file__))[0:-8]
 if script_path not in sys.path:
     sys.path.insert(0, script_path)
-from fastapi import FastAPI, APIRouter
+import uvicorn
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn, requests
-from settings import SERVER_IP, SERVER_PORT
-from database.api_keys_db_client import APIEncryptedDatabase
+
 from backend.src.accountant.router import router as accountant_router
 from backend.src.analyst.router import router as analyst_router
-from backend.src.chronos.router import router as chronos_router
 from backend.src.broker.router import router as broker_router
-from backend.src.reporter.router import router as reporter_router
-from backend.src.technician.router import router as technician_router
+from backend.src.chronos.router import router as chronos_router
 from backend.src.explorer.router import router as explorer_router
+from backend.src.reporter.router import router as reporter_router
 from backend.src.stock_analyst.router import router as stock_analyst_router
+from backend.src.technician.router import router as technician_router
 from backend.src.wiki.router import router as wiki_router
-
+from database.api_keys_db_client import APIEncryptedDatabase
 from database.trade_history_db_client import TradeHistoryDBClient
-
+from settings import SERVER_IP, SERVER_PORT
 
 # Define Router endpoints
 router = APIRouter()
@@ -47,6 +48,7 @@ app.add_middleware(
 
 app.include_router(router)
 
+
 @app.get("/")
 def read_root():
     return {"Sibyl Server Status": "Running"}
@@ -61,4 +63,11 @@ if __name__ == "__main__":
     APIEncryptedDatabase.init_db()
     # Run the application using the Uvicorn server
     print("Backend :: Starting Server...")
-    uvicorn.run(app, host=SERVER_IP, port=SERVER_PORT, log_level='debug', access_log=True, reload=False)
+    uvicorn.run(
+        app,
+        host=SERVER_IP,
+        port=SERVER_PORT,
+        log_level="debug",
+        access_log=True,
+        reload=False,
+    )

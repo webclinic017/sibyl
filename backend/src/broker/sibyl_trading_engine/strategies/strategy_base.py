@@ -1,5 +1,6 @@
-import pandas as pd
 from abc import ABC, abstractmethod
+
+import pandas as pd
 
 
 class BaseStrategy(ABC):
@@ -22,7 +23,6 @@ class BaseStrategy(ABC):
         self.data = None
         self.name = "base"
         self.is_price_only = False
-
 
     @abstractmethod
     def generate_signals(self, data: pd.DataFrame) -> pd.DataFrame:

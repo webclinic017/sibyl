@@ -1,13 +1,17 @@
 from pandas import DataFrame, concat
-from plotly.graph_objects import Figure, Scatter, Candlestick
-from streamlit import plotly_chart, warning, spinner, html, metric, write, caption
-from frontend.src.utils.analytics_helper.client import fetch_price_history
 from plotly.express import imshow
-from frontend.src.utils.strategy_helper.launcher_helper import get_market_condition_message, market_condition_explanation
+from plotly.graph_objects import Candlestick, Figure, Scatter
+from streamlit import caption, html, metric, plotly_chart, spinner, warning, write
+
+from frontend.src.utils.analytics_helper.client import fetch_price_history
+from frontend.src.utils.strategy_helper.launcher_helper import (
+    get_market_condition_message,
+    market_condition_explanation,
+)
 
 
 def show_analytics(quote_asset: str, base_asset: str, df: DataFrame, score: float):
-    with spinner('The Analyst is analyzing the data...'):
+    with spinner("The Analyst is analyzing the data..."):
         html("""
             <style>
                 .status_header {
@@ -34,41 +38,78 @@ def show_analytics(quote_asset: str, base_asset: str, df: DataFrame, score: floa
             </div>
 
         """)
-        caption("The Analyst class calculates a **score (%)** based on the OHLCV data, mostly relying on the price movement, that indicates whether the market is good for trading or not. **Higher is better**.")
+        caption(
+            "The Analyst class calculates a **score (%)** based on the OHLCV data, mostly relying on the price movement, that indicates whether the market is good for trading or not. **Higher is better**."
+        )
         market_condition_explanation()
         get_market_condition_message(score)
-        metric(f'{base_asset} Price in {quote_asset}', float(df['close_price'].iloc[-1]),
-               round(float(df['close_price'].iloc[-1]) - float(df['close_price'].iloc[-2]), 6))
+        metric(
+            f"{base_asset} Price in {quote_asset}",
+            float(df["close_price"].iloc[-1]),
+            round(float(df["close_price"].iloc[-1]) - float(df["close_price"].iloc[-2]), 6),
+        )
     return
 
 
 def show_line_plot_with_analytics(pair_symbol: str, price_hist_df: DataFrame) -> None:
     write(
-        "**Exponential Moving Average (EMA)**: A Moving Average that places more weight on recent price data, reacting faster to price changes compared to the simple moving average (SMA). It's calculated using an exponential decay formula, giving higher importance to recent data points.")
+        "**Exponential Moving Average (EMA)**: A Moving Average that places more weight on recent price data, reacting faster to price changes compared to the simple moving average (SMA). It's calculated using an exponential decay formula, giving higher importance to recent data points."
+    )
     write(
-        "**Relative Strength Index (RSI)**: RSI is a momentum oscillator that measures the speed and magnitude of price movements. It compares recent gains to losses, typically over a 14-day period, to determine whether a security is overbought or oversold. RSI values range from 0 to 100, with readings above 70 indicating overbought conditions and readings below 30 indicating oversold conditions.")
+        "**Relative Strength Index (RSI)**: RSI is a momentum oscillator that measures the speed and magnitude of price movements. It compares recent gains to losses, typically over a 14-day period, to determine whether a security is overbought or oversold. RSI values range from 0 to 100, with readings above 70 indicating overbought conditions and readings below 30 indicating oversold conditions."
+    )
     write(
-        "**Bollinger Bands** consist of three lines on a price chart: the middle band, the exponential moving average (EMA) over a specified period (e.g., 20 days); the upper band, calculated by adding two standard deviations to the middle band; and the lower band, calculated by subtracting two standard deviations from the middle band. Bollinger Bands help traders gauge market volatility, identify potential overbought or oversold conditions, and anticipate price reversals.")
-    with spinner('Generating Line Plot...'):
-
+        "**Bollinger Bands** consist of three lines on a price chart: the middle band, the exponential moving average (EMA) over a specified period (e.g., 20 days); the upper band, calculated by adding two standard deviations to the middle band; and the lower band, calculated by subtracting two standard deviations from the middle band. Bollinger Bands help traders gauge market volatility, identify potential overbought or oversold conditions, and anticipate price reversals."
+    )
+    with spinner("Generating Line Plot..."):
         fig = Figure()
         fig.add_trace(
-            Scatter(x=price_hist_df['DateTime'], y=price_hist_df['close_price'], mode='lines', name='Close Price'))
-        fig.add_trace(Scatter(
-            x=concat([price_hist_df['DateTime'], price_hist_df['DateTime'][::-1]]),
-            y=concat([price_hist_df['UpperBand'], price_hist_df['LowerBand'][::-1]]),
-            fill='toself', fillcolor='rgba(255, 165, 0, 0.5)',
-            line=dict(color='rgba(255, 165, 0, 0)'), name='Bollinger Bands Interval'))
+            Scatter(
+                x=price_hist_df["DateTime"],
+                y=price_hist_df["close_price"],
+                mode="lines",
+                name="Close Price",
+            )
+        )
+        fig.add_trace(
+            Scatter(
+                x=concat([price_hist_df["DateTime"], price_hist_df["DateTime"][::-1]]),
+                y=concat([price_hist_df["UpperBand"], price_hist_df["LowerBand"][::-1]]),
+                fill="toself",
+                fillcolor="rgba(255, 165, 0, 0.5)",
+                line=dict(color="rgba(255, 165, 0, 0)"),
+                name="Bollinger Bands Interval",
+            )
+        )
 
         fig.add_trace(
-            Scatter(x=price_hist_df['DateTime'], y=price_hist_df['RSI'], mode='lines', yaxis="y2", name='RSI', opacity=0.5,
-                    line=dict(color='purple')))
-        fig.update_layout(title=f'{pair_symbol} Price Analysis', xaxis_title='Date', yaxis_title='Price',
-                          yaxis2=dict(title='RSI', overlaying='y', side='right'), showlegend=True)
+            Scatter(
+                x=price_hist_df["DateTime"],
+                y=price_hist_df["RSI"],
+                mode="lines",
+                yaxis="y2",
+                name="RSI",
+                opacity=0.5,
+                line=dict(color="purple"),
+            )
+        )
+        fig.update_layout(
+            title=f"{pair_symbol} Price Analysis",
+            xaxis_title="Date",
+            yaxis_title="Price",
+            yaxis2=dict(title="RSI", overlaying="y", side="right"),
+            showlegend=True,
+        )
         plotly_chart(fig, use_container_width=True)
 
 
-def price_history_plot(exchange_api: str, pair_symbol: str, time_int: str, time_limit: int, plot_type : str = 'Line Plot') -> None:
+def price_history_plot(
+    exchange_api: str,
+    pair_symbol: str,
+    time_int: str,
+    time_limit: int,
+    plot_type: str = "Line Plot",
+) -> None:
     df = fetch_price_history(exchange_api, pair_symbol, time_int, time_limit)
     """
         "Open Time": entry[0],
@@ -82,24 +123,30 @@ def price_history_plot(exchange_api: str, pair_symbol: str, time_int: str, time_
     """
     if df is not None:
         fig = None
-        if plot_type == 'Line Plot':
-            fig = Figure(data=Scatter(x=df['DateTime'], y=df['Price']))
-            fig.update_layout(title=f"Price History of ada", xaxis_title="DateTime",  yaxis_title="Price (USDT)")
+        if plot_type == "Line Plot":
+            fig = Figure(data=Scatter(x=df["DateTime"], y=df["Price"]))
+            fig.update_layout(
+                title="Price History of ada",
+                xaxis_title="DateTime",
+                yaxis_title="Price (USDT)",
+            )
         else:  # candle plot
-            fig = Figure(data=Candlestick(
-                x=df['DateTime'],
-                open=df['Open Price'],
-                high=df['High'],
-                low=df['Low'],
-                close=df['Close Price']
-            ))
-            fig.update_layout(title=pair_symbol + ' Price History')
+            fig = Figure(
+                data=Candlestick(
+                    x=df["DateTime"],
+                    open=df["Open Price"],
+                    high=df["High"],
+                    low=df["Low"],
+                    close=df["Close Price"],
+                )
+            )
+            fig.update_layout(title=pair_symbol + " Price History")
 
         if fig is not None:
             plotly_chart(fig, use_container_width=True)
 
 
-def price_history_correlation_heatmap(coins, time_int_c='1d', time_limit_c=500, use_diff=False):
+def price_history_correlation_heatmap(coins, time_int_c="1d", time_limit_c=500, use_diff=False):
     corr_df = DataFrame()
     invalid_coins = []
     for coin in coins:
@@ -109,14 +156,14 @@ def price_history_correlation_heatmap(coins, time_int_c='1d', time_limit_c=500, 
         if df is None or df.shape[0] < 2:
             invalid_coins.append(coin)
         else:
-            corr_df[coin] = df['Close Price']
+            corr_df[coin] = df["Close Price"]
 
     if use_diff:
         corr_df = corr_df.diff()
 
     if len(invalid_coins) > 0:
-        warning('Price for **' + str(invalid_coins) + '** could not be fetched from the Server.')
+        warning("Price for **" + str(invalid_coins) + "** could not be fetched from the Server.")
 
-    corr_df = corr_df.corr(method='pearson')
-    fig = imshow(corr_df, text_auto=True, aspect="auto", color_continuous_scale='RdBu_r')
+    corr_df = corr_df.corr(method="pearson")
+    fig = imshow(corr_df, text_auto=True, aspect="auto", color_continuous_scale="RdBu_r")
     plotly_chart(fig, use_container_width=True)

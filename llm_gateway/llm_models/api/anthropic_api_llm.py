@@ -1,8 +1,8 @@
-from llm_gateway.llm_models.llm_base import LLMBase
-from database.api_keys_db_client import APIEncryptedDatabase
-from langchain.llms.base import LLM
 from langchain.llms.anthropic import Anthropic
-from typing import List
+from langchain.llms.base import LLM
+
+from database.api_keys_db_client import APIEncryptedDatabase
+from llm_gateway.llm_models.llm_base import LLMBase
 
 
 class AnthropicAPILLM(LLMBase):
@@ -31,10 +31,8 @@ class AnthropicAPILLM(LLMBase):
     def _llm_type(self) -> str:
         return "anthropic-api"
 
-
     def initialize_model(self):
         pass
-
 
     def generate_response(self, prompt: str, max_tokens: int = 800, temperature: float = 0.7) -> str:
         """
@@ -45,13 +43,11 @@ class AnthropicAPILLM(LLMBase):
 
         pass
 
-
-    def get_available_models(self) -> List[str]:
+    def get_available_models(self) -> list[str]:
         """
         get available models
         """
         pass
-
 
     def as_langchain_llm(self) -> LLM:
         """
@@ -59,4 +55,9 @@ class AnthropicAPILLM(LLMBase):
         """
         # from langchain.chat_models import init_chat_model
         # return init_chat_model("anthropic:claude-3-5-sonnet-latest", api_key=self.api_key)
-        return Anthropic(model=self.model_name, temperature=0.7, api_key=self.api_key, streaming=self.stream)
+        return Anthropic(
+            model=self.model_name,
+            temperature=0.7,
+            api_key=self.api_key,
+            streaming=self.stream,
+        )

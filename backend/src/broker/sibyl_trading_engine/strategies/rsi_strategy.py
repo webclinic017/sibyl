@@ -1,6 +1,9 @@
-from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import BaseStrategy
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import (
+    BaseStrategy,
+)
 
 
 class RSIStrategy(BaseStrategy):
@@ -26,7 +29,6 @@ class RSIStrategy(BaseStrategy):
         self.name = "RSI"
         self.is_price_only = True
 
-
     def calculate_rsi(self) -> pd.Series:
         """
         Calculates the Relative Strength Index (RSI).
@@ -44,7 +46,6 @@ class RSIStrategy(BaseStrategy):
         rs = avg_gain / (avg_loss + 1e-10)  # Avoid division by zero
         return 100 - (100 / (1 + rs))
 
-
     def generate_signals(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Generates buy, sell, or hold signals based on RSI values.
@@ -54,6 +55,9 @@ class RSIStrategy(BaseStrategy):
         """
         self.data = data
         self.data["rsi"] = self.calculate_rsi()
-        self.data["signal"] = np.where(self.data["rsi"] < self.buy_threshold, "BUY",
-                                       np.where(self.data["rsi"] > self.sell_threshold, "SELL", "HOLD"))
+        self.data["signal"] = np.where(
+            self.data["rsi"] < self.buy_threshold,
+            "BUY",
+            np.where(self.data["rsi"] > self.sell_threshold, "SELL", "HOLD"),
+        )
         return self.data[["timestamp", "close_price", "rsi", "signal"]]

@@ -1,9 +1,9 @@
 import requests
-import json
+
 from frontend.config.config import BACKEND_SERVER_ADDRESS
 
 
-def fetch_apis_status(api_name: str = 'all') -> dict:
+def fetch_apis_status(api_name: str = "all") -> dict:
     url = f"{BACKEND_SERVER_ADDRESS}/technician/status/api/{api_name}"
     response = requests.get(url)
     print(response.json())
@@ -13,8 +13,7 @@ def fetch_apis_status(api_name: str = 'all') -> dict:
         return {}
 
 
-def post_new_api_keys(api_name:str, api_key: str, secret_key: str = None, api_metadata: str = None) -> bool:
-
+def post_new_api_keys(api_name: str, api_key: str, secret_key: str = None, api_metadata: str = None) -> bool:
     url = f"{BACKEND_SERVER_ADDRESS}/technician/credentials/apis/add"
 
     data = {
@@ -47,7 +46,7 @@ def set_mock_exchange_status(status: bool) -> bool:
 
 
 def get_available_local_models(library: str) -> list[str] | None:
-    library = library.lower().replace(' ', '_')
+    library = library.lower().replace(" ", "_")
     url = f"{BACKEND_SERVER_ADDRESS}/technician/status/local/models?library={library}"
     response = requests.get(url)
     try:
@@ -61,7 +60,7 @@ def get_available_local_models(library: str) -> list[str] | None:
 
 
 def get_available_api_models(llm_api: str) -> list[str] | None:
-    llm_api = llm_api.lower().replace(' ', '_')
+    llm_api = llm_api.lower().replace(" ", "_")
     url = f"{BACKEND_SERVER_ADDRESS}/technician/status/api/models?llm_api={llm_api}"
     response = requests.get(url)
     try:

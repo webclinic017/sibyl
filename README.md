@@ -14,6 +14,8 @@
 [![Pandas](https://img.shields.io/badge/pandas-v2.2.3-lightgrey)]()
 [![Plotly](https://img.shields.io/badge/plotly-v6.0.1-green)]()
 [![Sklearn](https://img.shields.io/badge/Scikit_Learn-v1.6.1-purple)]()
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/nmaroulis/sibyl)
 
 
 # Sibyl - Your AI-Powered Crypto Trading Hub with a UI

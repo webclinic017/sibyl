@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from langchain.agents import Tool
 
 
@@ -21,4 +22,3 @@ class BaseTool(ABC):
         Returns this tool as a LangChain Tool object.
         """
         pass
-

@@ -1,21 +1,28 @@
+import bisect
+from typing import Any
+
+import requests
+from binance.client import Client
+from binance.enums import (
+    ORDER_TYPE_LIMIT,
+    ORDER_TYPE_MARKET,
+    ORDER_TYPE_STOP_LOSS,
+    ORDER_TYPE_STOP_LOSS_LIMIT,
+    ORDER_TYPE_TAKE_PROFIT,
+    ORDER_TYPE_TAKE_PROFIT_LIMIT,
+)
+from binance.exceptions import BinanceAPIException, BinanceRequestException
+
 from backend.src.exchange_client.exchange_client import ExchangeAPIClient
 from database.api_keys_db_client import APIEncryptedDatabase
-from binance.client import Client
-from binance.exceptions import BinanceAPIException, BinanceRequestException
-from binance.enums import ORDER_TYPE_STOP_LOSS, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET, ORDER_TYPE_STOP_LOSS_LIMIT, \
-    ORDER_TYPE_TAKE_PROFIT_LIMIT, ORDER_TYPE_TAKE_PROFIT
-from typing import Optional, Dict, Any, List, Union
 from database.trade_history_db_client import TradeHistoryDBClient
-import requests
-import bisect
 
 
 class BinanceClient(ExchangeAPIClient):
-
     def __init__(self):
         super().__init__()
-        self.name = 'binance'
-        self.api_base_url = 'https://api.binance.com'  # api[1-4]
+        self.name = "binance"
+        self.api_base_url = "https://api.binance.com"  # api[1-4]
         api_creds = APIEncryptedDatabase.get_api_key_by_name(self.name)
         if api_creds is None:
             self.client = None
@@ -34,15 +41,25 @@ class BinanceClient(ExchangeAPIClient):
         """
 
         if self.client is None:
-            return 'Empty Credentials'
+            return "Empty Credentials"
         try:
             self.client.get_account()
-            return 'Active'
+            return "Active"
         except BinanceAPIException:
-            return 'Invalid Credentials'
+            return "Invalid Credentials"
 
-
-    def place_spot_order(self, order_type: str, quote_asset: str, base_asset: str, side: str, quantity: float, price: Optional[float] = None, stop_price: Optional[float] = None, take_profit_price: Optional[float] = None, time_in_force: Optional[str] = None) -> Dict[str, Any]:
+    def place_spot_order(
+        self,
+        order_type: str,
+        quote_asset: str,
+        base_asset: str,
+        side: str,
+        quantity: float,
+        price: float | None = None,
+        stop_price: float | None = None,
+        take_profit_price: float | None = None,
+        time_in_force: str | None = None,
+    ) -> dict[str, Any]:
         """
         Places an order on Binance based on the given parameters.
 
@@ -78,14 +95,14 @@ class BinanceClient(ExchangeAPIClient):
                     symbol=trading_pair,
                     side=side,
                     type=ORDER_TYPE_MARKET,
-                    quantity=quantity
+                    quantity=quantity,
                 )
             elif order_type == "market_quote":
                 res = self.client.order_market(
                     symbol=trading_pair,
                     side=side,
                     type=ORDER_TYPE_MARKET,
-                    quoteOrderQty=quantity # this quantity specifies the amount of quote asset to be spent for this transaction. e.g. for BTCUSDT buy 10 USDT worth of BTC
+                    quoteOrderQty=quantity,  # this quantity specifies the amount of quote asset to be spent for this transaction. e.g. for BTCUSDT buy 10 USDT worth of BTC
                 )
             elif order_type == "limit":
                 res = self.client.order_limit(
@@ -94,7 +111,7 @@ class BinanceClient(ExchangeAPIClient):
                     type=ORDER_TYPE_LIMIT,
                     quantity=quantity,
                     price=price,
-                    timeInForce=time_in_force
+                    timeInForce=time_in_force,
                 )
             elif order_type == "stop-Loss":
                 res = self.client.create_order(
@@ -102,7 +119,7 @@ class BinanceClient(ExchangeAPIClient):
                     side=side,
                     type=ORDER_TYPE_STOP_LOSS,
                     quantity=quantity,
-                    stopPrice=stop_price
+                    stopPrice=stop_price,
                 )
             elif order_type == "stop-loss limit":
                 res = self.client.create_order(
@@ -112,7 +129,7 @@ class BinanceClient(ExchangeAPIClient):
                     quantity=quantity,
                     price=price,
                     stopPrice=stop_price,
-                    timeInForce=time_in_force
+                    timeInForce=time_in_force,
                 )
             elif order_type == "take-profit":
                 res = self.client.create_order(
@@ -120,7 +137,7 @@ class BinanceClient(ExchangeAPIClient):
                     side=side,
                     type=ORDER_TYPE_TAKE_PROFIT,
                     quantity=quantity,
-                    stopPrice=take_profit_price
+                    stopPrice=take_profit_price,
                 )
             elif order_type == "take-profit limit":
                 res = self.client.create_order(
@@ -130,7 +147,7 @@ class BinanceClient(ExchangeAPIClient):
                     quantity=quantity,
                     price=price,
                     stopPrice=take_profit_price,
-                    timeInForce=time_in_force
+                    timeInForce=time_in_force,
                 )
             elif order_type == "oco":
                 res = self.client.create_oco_order(
@@ -138,7 +155,7 @@ class BinanceClient(ExchangeAPIClient):
                     side=side,
                     quantity=quantity,
                     price=price,
-                    stopPrice=stop_price
+                    stopPrice=stop_price,
                 )
             else:
                 raise ValueError("Invalid order type")
@@ -149,8 +166,18 @@ class BinanceClient(ExchangeAPIClient):
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-
-    def place_spot_test_order(self, order_type: str, quote_asset: str, base_asset: str, side: str, quantity: float, price: Optional[float] = None, stop_price: Optional[float] = None, take_profit_price: Optional[float] = None, time_in_force: Optional[str] = None) -> Dict[str, str]:
+    def place_spot_test_order(
+        self,
+        order_type: str,
+        quote_asset: str,
+        base_asset: str,
+        side: str,
+        quantity: float,
+        price: float | None = None,
+        stop_price: float | None = None,
+        take_profit_price: float | None = None,
+        time_in_force: str | None = None,
+    ) -> dict[str, str]:
         """
         Same as place_spot_order but to test if the trade is possible.
 
@@ -166,14 +193,14 @@ class BinanceClient(ExchangeAPIClient):
                     symbol=trading_pair,
                     side=side,
                     type=ORDER_TYPE_MARKET,
-                    quantity=quantity
+                    quantity=quantity,
                 )
             elif order_type == "market_quote":
                 res = self.client.create_test_order(
                     symbol=trading_pair,
                     side=side,
                     type=ORDER_TYPE_MARKET,
-                    quoteOrderQty=quantity
+                    quoteOrderQty=quantity,
                 )
             elif order_type == "limit":
                 res = self.client.create_test_order(
@@ -182,7 +209,7 @@ class BinanceClient(ExchangeAPIClient):
                     type=ORDER_TYPE_LIMIT,
                     quantity=quantity,
                     price=price,
-                    timeInForce=time_in_force
+                    timeInForce=time_in_force,
                 )
             elif order_type == "stop-Loss":
                 res = self.client.create_test_order(
@@ -190,7 +217,7 @@ class BinanceClient(ExchangeAPIClient):
                     side=side,
                     type=ORDER_TYPE_STOP_LOSS,
                     quantity=quantity,
-                    stopPrice=stop_price
+                    stopPrice=stop_price,
                 )
             elif order_type == "stop-loss limit":
                 res = self.client.create_test_order(
@@ -200,7 +227,7 @@ class BinanceClient(ExchangeAPIClient):
                     quantity=quantity,
                     price=price,
                     stopPrice=stop_price,
-                    timeInForce=time_in_force
+                    timeInForce=time_in_force,
                 )
             elif order_type == "take-profit":
                 res = self.client.create_test_order(
@@ -208,7 +235,7 @@ class BinanceClient(ExchangeAPIClient):
                     side=side,
                     type=ORDER_TYPE_TAKE_PROFIT,
                     quantity=quantity,
-                    stopPrice=take_profit_price
+                    stopPrice=take_profit_price,
                 )
             elif order_type == "take-profit limit":
                 res = self.client.create_test_order(
@@ -218,7 +245,7 @@ class BinanceClient(ExchangeAPIClient):
                     quantity=quantity,
                     price=price,
                     stopPrice=take_profit_price,
-                    timeInForce=time_in_force
+                    timeInForce=time_in_force,
                 )
             elif order_type == "oco":
                 res = self.client.create_test_order(
@@ -226,19 +253,18 @@ class BinanceClient(ExchangeAPIClient):
                     side=side,
                     quantity=quantity,
                     price=price,
-                    stopPrice=stop_price
+                    stopPrice=stop_price,
                 )
             else:
                 return {"status": "error", "message": "Invalid order type"}
-            if res == {}: # SUCCESS
+            if res == {}:  # SUCCESS
                 return {"status": "success", "message": ""}
             else:
                 return {"status": "error", "message": res}
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-
-    def get_account_information(self) -> Dict[str, Any]:
+    def get_account_information(self) -> dict[str, Any]:
         """
         Fetches the account information from the exchange, including the commission rates
         (maker, taker, buyer, and seller) and the account's ability to perform trading,
@@ -266,15 +292,21 @@ class BinanceClient(ExchangeAPIClient):
 
         try:
             account_info = self.client.get_account()
-            return {"maker_commission": account_info["makerCommission"]/100, "taker_commission": account_info["takerCommission"]/100,
-                    "buyer_commission": account_info["buyerCommission"]/100, "seller_commission": account_info["sellerCommission"]/100, "can_trade": account_info["canTrade"], "can_deposit": account_info["canDeposit"], "can_withdraw": account_info["canWithdraw"]}
+            return {
+                "maker_commission": account_info["makerCommission"] / 100,
+                "taker_commission": account_info["takerCommission"] / 100,
+                "buyer_commission": account_info["buyerCommission"] / 100,
+                "seller_commission": account_info["sellerCommission"] / 100,
+                "can_trade": account_info["canTrade"],
+                "can_deposit": account_info["canDeposit"],
+                "can_withdraw": account_info["canWithdraw"],
+            }
         except BinanceRequestException as e:
             return {"error": str(e)}
         except BinanceAPIException as e:
             return {"error": str(e)}
 
-
-    def get_spot_balance(self, quote_asset_pair_price: str = None) -> Dict[str, Any]:
+    def get_spot_balance(self, quote_asset_pair_price: str | None = None) -> dict[str, Any]:
         """
         Retrieve the user's spot balance, including free and locked amounts, along with current prices.
 
@@ -292,42 +324,51 @@ class BinanceClient(ExchangeAPIClient):
             spot_balances = {}
 
             for asset in account_info:
-                if float(asset['free']) > 0.0 or float(asset['locked']) > 0.0:
-
+                if float(asset["free"]) > 0.0 or float(asset["locked"]) > 0.0:
                     # IN CASE OF LOCKED ASSET, in Binance it is denoted as LD+Asset_name
-                    if asset['asset'].startswith('LD'):  # or asset['asset'].startswith('ST'): # TODO Examine staked balance
-
-                        price = self.get_pair_market_price(f"{asset['asset'][2:]}{quote_asset_pair_price}") if quote_asset_pair_price else 0.0
-                        if price is None: price = 0.0
+                    if asset["asset"].startswith(
+                        "LD"
+                    ):  # or asset['asset'].startswith('ST'): # TODO Examine staked balance
+                        price = (
+                            self.get_pair_market_price(f"{asset['asset'][2:]}{quote_asset_pair_price}")
+                            if quote_asset_pair_price
+                            else 0.0
+                        )
+                        if price is None:
+                            price = 0.0
                         balance_data = {
-                            'free': 0.0,
-                            'locked': float(asset['free']),
-                            'price': price
+                            "free": 0.0,
+                            "locked": float(asset["free"]),
+                            "price": price,
                         }
-                        if asset['asset'][2:] in spot_balances.keys():
-                            spot_balances[asset['asset'][2:]]['locked'] += balance_data['locked']
+                        if asset["asset"][2:] in spot_balances.keys():
+                            spot_balances[asset["asset"][2:]]["locked"] += balance_data["locked"]
                         else:
-                            spot_balances[asset['asset'][2:]] = balance_data
+                            spot_balances[asset["asset"][2:]] = balance_data
                     else:
-                        price = self.get_pair_market_price(f"{asset['asset']}{quote_asset_pair_price}") if quote_asset_pair_price else 0.0
-                        if price is None: price = 0.0
+                        price = (
+                            self.get_pair_market_price(f"{asset['asset']}{quote_asset_pair_price}")
+                            if quote_asset_pair_price
+                            else 0.0
+                        )
+                        if price is None:
+                            price = 0.0
                         balance_data = {
-                            'free': float(asset['free']),
-                            'locked': float(asset['locked']),
-                            'price': price
+                            "free": float(asset["free"]),
+                            "locked": float(asset["locked"]),
+                            "price": price,
                         }
-                        if asset['asset'] in spot_balances.keys():
-                            spot_balances[asset['asset']]['free'] += balance_data['free']
+                        if asset["asset"] in spot_balances.keys():
+                            spot_balances[asset["asset"]]["free"] += balance_data["free"]
                         else:
-                            spot_balances[asset['asset']] = balance_data
+                            spot_balances[asset["asset"]] = balance_data
             return {
-                'spot_balances': spot_balances,
+                "spot_balances": spot_balances,
             }
         except BinanceAPIException as e:
             return {"error": str(e)}
 
-
-    def get_available_assets(self, quote_asset: str = "all") -> Optional[Dict[str, List[str]]]:
+    def get_available_assets(self, quote_asset: str = "all") -> dict[str, list[str]] | None:
         """
         Fetches available trading pairs from Binance and groups them by quote asset.
 
@@ -348,7 +389,7 @@ class BinanceClient(ExchangeAPIClient):
         try:
             exchange_info = self.client.get_exchange_info()
             # Dictionary to store quote assets and their corresponding base assets
-            assets_by_quote: Dict[str, List[str]] = {}
+            assets_by_quote: dict[str, list[str]] = {}
 
             for symbol in exchange_info["symbols"]:
                 if symbol["status"] == "TRADING":  # Only include actively trading pairs
@@ -358,7 +399,7 @@ class BinanceClient(ExchangeAPIClient):
                     if quote_currency not in assets_by_quote:
                         assets_by_quote[quote_currency] = []
 
-                    bisect.insort(assets_by_quote[quote_currency], base_currency) # insert in alphabetical order
+                    bisect.insort(assets_by_quote[quote_currency], base_currency)  # insert in alphabetical order
 
             # Apply filtering if a specific quote_asset is requested
             if quote_asset != "all":
@@ -367,11 +408,17 @@ class BinanceClient(ExchangeAPIClient):
             return assets_by_quote  # Return full dictionary if "all" is requested
 
         except BinanceAPIException as e:
-            print(f"Binance Exchange Client :: get_available_assets :: {str(e)}")
+            print(f"Binance Exchange Client :: get_available_assets :: {e!s}")
             return None
 
-
-    def get_klines(self, symbol: str, interval: str, limit: int, start_time: int = None, end_time: int = None) -> Optional[List[Dict[str, float]]]:
+    def get_klines(
+        self,
+        symbol: str,
+        interval: str,
+        limit: int,
+        start_time: int = None,
+        end_time: int = None,
+    ) -> list[dict[str, float]] | None:
         """
         Fetches historical OHLCV data for a given symbol from the client.
 
@@ -403,7 +450,12 @@ class BinanceClient(ExchangeAPIClient):
         """
         try:
             if start_time:
-                klines = self.client.get_klines(symbol=symbol.upper(), interval=interval, limit=limit, startTime=start_time)
+                klines = self.client.get_klines(
+                    symbol=symbol.upper(),
+                    interval=interval,
+                    limit=limit,
+                    startTime=start_time,
+                )
             else:
                 klines = self.client.get_klines(symbol=symbol.upper(), interval=interval, limit=limit)
             return [
@@ -423,8 +475,7 @@ class BinanceClient(ExchangeAPIClient):
             print(f"get_klines :: Error fetching price history: {e}")
             return None
 
-
-    def get_symbol_info(self, symbol: str) -> Dict[str, Any] | None:
+    def get_symbol_info(self, symbol: str) -> dict[str, Any] | None:
         """
         Retrieves information about a specific symbol pair.
 
@@ -469,7 +520,7 @@ class BinanceClient(ExchangeAPIClient):
             # exchange_info["baseAssetPrecision"] and exchange_info["quoteAssetPrecision"] indicate the precision in the amount that can be held in the account, not for trade
             response_dict = {
                 "status": exchange_info["status"],
-                "order_types": exchange_info["orderTypes"]
+                "order_types": exchange_info["orderTypes"],
             }
 
             for filter_item in exchange_info.get("filters", []):
@@ -488,8 +539,7 @@ class BinanceClient(ExchangeAPIClient):
             print(f"Unexpected error: {e}")
             return None
 
-
-    def get_minimum_trade_value(self, symbol: str) -> Optional[Dict[str, Union[float, str]]]:
+    def get_minimum_trade_value(self, symbol: str) -> dict[str, float | str] | None:
         """
         Retrieves the minimum trade value required for a given trading pair.
 
@@ -522,7 +572,6 @@ class BinanceClient(ExchangeAPIClient):
             print(f"Unexpected error: {e}")
             return None
 
-
     def get_pair_market_price(self, pair_symbol: str) -> float | None:
         """
         Function to get the current price of an asset in a specific quote currency using Binance API.
@@ -535,14 +584,13 @@ class BinanceClient(ExchangeAPIClient):
             # Get the current price for the symbol
             ticker = self.client.get_symbol_ticker(symbol=pair_symbol)
             if ticker:
-                return float(ticker['price'])
+                return float(ticker["price"])
             else:
                 print(f"Error: No data found for symbol {pair_symbol}")
                 return None
         except Exception as e:
             print(f"Error: {e}")
             return None
-
 
     def add_spot_order_to_trade_history_db(self, quote_asset: str, base_asset: str, trade_dict: dict) -> bool:
         """
@@ -555,17 +603,28 @@ class BinanceClient(ExchangeAPIClient):
         :return: True if successful else False.
         """
         try:
-            TradeHistoryDBClient.add_trade_to_db(self.name, trade_dict["transactTime"], str(trade_dict["orderId"]),
-                                                 quote_asset, base_asset, trade_dict["executedQty"],
-                                                 trade_dict["cummulativeQuoteQty"], trade_dict["side"], trade_dict["type"],
-                                                 trade_dict["status"], trade_dict["timeInForce"], None, None, trade_dict["selfTradePreventionMode"])
+            TradeHistoryDBClient.add_trade_to_db(
+                self.name,
+                trade_dict["transactTime"],
+                str(trade_dict["orderId"]),
+                quote_asset,
+                base_asset,
+                trade_dict["executedQty"],
+                trade_dict["cummulativeQuoteQty"],
+                trade_dict["side"],
+                trade_dict["type"],
+                trade_dict["status"],
+                trade_dict["timeInForce"],
+                None,
+                None,
+                trade_dict["selfTradePreventionMode"],
+            )
             return True
         except Exception as e:
             print(f"Error: {e}")
             return False
 
-
-    def get_orderbook(self, quote_asset: str, base_asset: str, limit: int) ->Optional[List[List[Dict[str, float]]]]:
+    def get_orderbook(self, quote_asset: str, base_asset: str, limit: int) -> list[list[dict[str, float]]] | None:
         """
         Fetches the order book for a given trading pair from Binance and formats the data.
 
@@ -592,14 +651,8 @@ class BinanceClient(ExchangeAPIClient):
             asks = order_book["asks"]
 
             # Format bids and asks into the required structure
-            formatted_bids = [
-                {"x": i, "y": float(bid[1]), "price": float(bid[0])}
-                for i, bid in enumerate(bids)
-            ]
-            formatted_asks = [
-                {"x": i, "y": float(ask[1]), "price": float(ask[0])}
-                for i, ask in enumerate(asks)
-            ]
+            formatted_bids = [{"x": i, "y": float(bid[1]), "price": float(bid[0])} for i, bid in enumerate(bids)]
+            formatted_asks = [{"x": i, "y": float(ask[1]), "price": float(ask[0])} for i, ask in enumerate(asks)]
 
             return [formatted_bids, formatted_asks]
 

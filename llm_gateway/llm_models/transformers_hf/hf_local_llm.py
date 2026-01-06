@@ -1,21 +1,22 @@
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from huggingface_hub import login
-from llm_gateway.llm_models.llm_base import LLMBase
-from database.api_keys_db_client import APIEncryptedDatabase
 import os
 import platform
-from typing import List
 
+import torch
+from huggingface_hub import login
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+from database.api_keys_db_client import APIEncryptedDatabase
+from llm_gateway.llm_models.llm_base import LLMBase
 
 # TODO - FIX HERE
+
 
 class HuggingFaceLocalLLM(LLMBase):
     """
     Implements the LLMBase for Hugging Face models.
     """
 
-    def __init__(self, model_name: str = "mistralai/Mistral-7B-Instruct-v0.3", device=None): #
+    def __init__(self, model_name: str = "mistralai/Mistral-7B-Instruct-v0.3", device=None):  #
         """
         Initializes a Hugging Face model.
 
@@ -40,12 +41,9 @@ class HuggingFaceLocalLLM(LLMBase):
             os.environ["HF_HOME"] = api_creds.api_key
             login(token=api_creds.api_key)
             self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-            self.model = AutoModelForCausalLM.from_pretrained(
-                model_name, torch_dtype=torch.float16, device_map="auto"
-            )
+            self.model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map="auto")
 
-
-    def get_available_models(self) -> List[str]:
+    def get_available_models(self) -> list[str]:
         """
         get available models
         """

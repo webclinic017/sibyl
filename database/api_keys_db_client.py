@@ -1,16 +1,18 @@
+import logging
 import os
+
 import sqlalchemy as sa
-from sqlalchemy.orm import sessionmaker, declarative_base
 from cryptography.fernet import Fernet, InvalidToken
 from dotenv import load_dotenv
-import logging
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 logging.basicConfig()
-logging.getLogger('sqlalchemy').setLevel(logging.ERROR)
+logging.getLogger("sqlalchemy").setLevel(logging.ERROR)
+
 
 class APIEncryptedDatabase:
     # Load environment variables and define constants
-    load_dotenv('database/db_paths.env')
+    load_dotenv("database/db_paths.env")
 
     DATABASE_URL = os.getenv("API_KEYS_DB_PATH")
     KEY_FILE = "database/encryption_key.key"
@@ -31,11 +33,19 @@ class APIEncryptedDatabase:
         secret_key = sa.Column(sa.String, nullable=True)
         api_metadata = sa.Column(sa.String, nullable=True)
 
-        def __init__(self, name: str, api_key: str, secret_key: str = None, api_metadata: str = None):
+        def __init__(
+            self,
+            name: str,
+            api_key: str,
+            secret_key: str = None,
+            api_metadata: str = None,
+        ):
             self.name = name
             self.api_key = APIEncryptedDatabase.cipher.encrypt(api_key.encode()).decode()
             self.secret_key = APIEncryptedDatabase.cipher.encrypt(secret_key.encode()).decode() if secret_key else None
-            self.api_metadata = APIEncryptedDatabase.cipher.encrypt(api_metadata.encode()).decode() if api_metadata else None
+            self.api_metadata = (
+                APIEncryptedDatabase.cipher.encrypt(api_metadata.encode()).decode() if api_metadata else None
+            )
 
         def decrypt_data(self):
             try:
@@ -120,7 +130,13 @@ class APIEncryptedDatabase:
         return None
 
     @classmethod
-    def update_api_key(cls, name: str, new_api_key: str = None, new_secret_key: str = None, new_metadata: str = None):
+    def update_api_key(
+        cls,
+        name: str,
+        new_api_key: str = None,
+        new_secret_key: str = None,
+        new_metadata: str = None,
+    ):
         """Updates an existing API key by name."""
         session = cls.Session()
         key = session.query(cls.APIKeyStore).filter_by(name=name).first()

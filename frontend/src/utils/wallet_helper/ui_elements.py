@@ -1,8 +1,12 @@
 import pandas as pd
-import streamlit as st
-from frontend.src.utils.wallet_helper.client import fetch_account_spot, fetch_account_information
-from plotly.graph_objects import Figure, Pie
 import plotly.graph_objects as go
+import streamlit as st
+from plotly.graph_objects import Figure, Pie
+
+from frontend.src.utils.wallet_helper.client import (
+    fetch_account_information,
+    fetch_account_spot,
+)
 
 
 def fetch_and_parse_spot_balance(exchange: str, quote_pair_asset: str = None) -> pd.DataFrame | None:
@@ -20,7 +24,7 @@ def fetch_and_parse_spot_balance(exchange: str, quote_pair_asset: str = None) ->
         "DOT": "https://cloudfront-us-east-1.images.arcpublishing.com/coindesk/FCVVAWNXP5AXLP4IEVIQHD6XIY.png",
         "USDT": "https://cloudfront-us-east-1.images.arcpublishing.com/coindesk/KTF6M73FKBACNI5JQ4S3EW7MRI.png",
         "DOGE": "https://resources.cryptocompare.com/asset-management/26/1662541306654.png",
-        "USDC": "https://resources.cryptocompare.com/asset-management/14/1728310128919.png"
+        "USDC": "https://resources.cryptocompare.com/asset-management/14/1728310128919.png",
     }
 
     # pd.set_option('float_format', '{:f}'.format)
@@ -33,27 +37,31 @@ def fetch_and_parse_spot_balance(exchange: str, quote_pair_asset: str = None) ->
         # Calc the amount in quote
         if quote_pair_asset is not None:
             df["Amount in Quote"] = df["Amount in Quote"] * (df["Available SPOT"] + df["Locked"])
-        df['icon'] = df['Asset'].map(icon_dict).fillna(
-            'https://cloudfront-us-east-1.images.arcpublishing.com/coindesk/IKNBTK7JKVEWHGGBKEQMN2HZMM.png')
-        df.insert(0, 'icon', df.pop('icon'))
-        df.sort_values(by=['Asset'], inplace=True)
+        df["icon"] = (
+            df["Asset"]
+            .map(icon_dict)
+            .fillna("https://cloudfront-us-east-1.images.arcpublishing.com/coindesk/IKNBTK7JKVEWHGGBKEQMN2HZMM.png")
+        )
+        df.insert(0, "icon", df.pop("icon"))
+        df.sort_values(by=["Asset"], inplace=True)
 
         # save to session state
-        st.session_state[f"{exchange}_account_balance"] = dict(zip(df['Asset'], df['Available SPOT']))
+        st.session_state[f"{exchange}_account_balance"] = dict(zip(df["Asset"], df["Available SPOT"], strict=False))
 
         return df
     else:
         return None
 
-def get_spot_balance_wallet_table(exchange: str, quote_pair_asset: str = None) -> None:
-    with st.spinner('Fetching Wallet Balance Information...'):
 
+def get_spot_balance_wallet_table(exchange: str, quote_pair_asset: str = None) -> None:
+    with st.spinner("Fetching Wallet Balance Information..."):
         df = fetch_and_parse_spot_balance(exchange, quote_pair_asset)
         if df is not None:
             if quote_pair_asset is None:
                 quote_pair_asset = "N/A"
 
-            wallet_html = f"""
+            wallet_html = (
+                f"""
             <style>
                 .wallet-container {{
                     background-color: #343434;
@@ -121,31 +129,41 @@ def get_spot_balance_wallet_table(exchange: str, quote_pair_asset: str = None) -
                         </tr>
                     </thead>
                     <tbody>
-                        """ + "".join([
-                f"""
+                        """
+                + "".join(
+                    [
+                        f"""
                             <tr>
-                                <td class='asset-name'><img src='{row['icon']}' alt='{row['Asset']}'> {row['Asset']}</td>
-                                <td class='spot-amount'>{row['Available SPOT']}</td>
-                                <td class='staked-amount'>{row['Locked']}</td>
-                                <td class='quote-amount'>{row['Amount in Quote']} {quote_pair_asset}</td>
+                                <td class='asset-name'><img src='{row["icon"]}' alt='{row["Asset"]}'> {row["Asset"]}</td>
+                                <td class='spot-amount'>{row["Available SPOT"]}</td>
+                                <td class='staked-amount'>{row["Locked"]}</td>
+                                <td class='quote-amount'>{row["Amount in Quote"]} {quote_pair_asset}</td>
                             </tr>
-                            """ for _, row in df.iterrows()
-            ]) + f"""
+                            """
+                        for _, row in df.iterrows()
+                    ]
+                )
+                + f"""
                     </tbody>
                 </table>
-                <div class="wallet-title">Total Balance: <span class='quote-amount'>{round(df['Amount in Quote'].sum(), 2)} {quote_pair_asset}</span></div>
+                <div class="wallet-title">Total Balance: <span class='quote-amount'>{round(df["Amount in Quote"].sum(), 2)} {quote_pair_asset}</span></div>
             </div>
             """
+            )
 
             st.html(wallet_html)
             if exchange == "Coinbase Sandbox":
-                st.info('💡 Price in Quote asset is calculated using the Coinbase API, since the Sandbox contains limited markets.')
+                st.info(
+                    "💡 Price in Quote asset is calculated using the Coinbase API, since the Sandbox contains limited markets."
+                )
         else:
-            st.error("Failed to fetch Account Spot Balance. Check logs.", icon=":material/warning:")
+            st.error(
+                "Failed to fetch Account Spot Balance. Check logs.",
+                icon=":material/warning:",
+            )
 
 
 def get_pie_chart(exchange: str, quote_pair_asset: str = None) -> None:
-
     df = fetch_and_parse_spot_balance(exchange, quote_pair_asset)
     if df is not None:
         pie_chart_labels = []
@@ -155,24 +173,35 @@ def get_pie_chart(exchange: str, quote_pair_asset: str = None) -> None:
             pie_chart_values.append(row["Amount in Quote"])
 
         if len(pie_chart_values) > 10:
-            label_value_pairs = list(zip(pie_chart_labels, pie_chart_values))
+            label_value_pairs = list(zip(pie_chart_labels, pie_chart_values, strict=False))
             sorted_pairs = sorted(label_value_pairs, key=lambda x: x[1], reverse=True)
             top_n_pairs = sorted_pairs[:10]
-            top_n_labels, top_n_values = zip(*top_n_pairs)
-            top_n_labels = top_n_labels + ('Other',)
+            top_n_labels, top_n_values = zip(*top_n_pairs, strict=False)
+            top_n_labels = top_n_labels + ("Other",)
             top_n_values = top_n_values + (sum(pie_chart_values) - sum(top_n_values),)
         else:
             top_n_labels, top_n_values = pie_chart_labels, pie_chart_values
 
-        fig = Figure(data=[Pie(labels=top_n_labels, values=top_n_values, hole=0.6, textinfo='percent')])
+        fig = Figure(
+            data=[
+                Pie(
+                    labels=top_n_labels,
+                    values=top_n_values,
+                    hole=0.6,
+                    textinfo="percent",
+                )
+            ]
+        )
         fig.update_layout(margin=go.layout.Margin(t=20))
-        fig.update_layout(legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-        ))  # , margin=dict(l=20, t=20, r=20, b=0)
+        fig.update_layout(
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+            )
+        )  # , margin=dict(l=20, t=20, r=20, b=0)
         st.plotly_chart(fig, config=dict(displayModeBar=False), use_container_width=True)
         st.html('<p style="text-align:center;font-size:5;color:grey">A maximum of 10 Assets can be displayed.</p>')
 
@@ -184,7 +213,6 @@ def get_logo_header() -> None:
 
 
 def get_account_information(exchange: str) -> None:
-
     # Sample Binance commission data
     data = fetch_account_information(exchange)
 
@@ -242,31 +270,31 @@ def get_account_information(exchange: str) -> None:
         <div class="exchange-header">{exchange} Account Info</div>
         <div class="commission-item">
             <span class="label">Maker Commission:</span>
-            <span class="value">{data['maker_commission']} %</span>
+            <span class="value">{data["maker_commission"]} %</span>
         </div>
         <div class="commission-item">
             <span class="label">Taker Commission:</span>
-            <span class="value">{data['taker_commission']} %</span>
+            <span class="value">{data["taker_commission"]} %</span>
         </div>
         <div class="commission-item">
             <span class="label">Buyer Commission:</span>
-            <span class="value">{data['buyer_commission']} %</span>
+            <span class="value">{data["buyer_commission"]} %</span>
         </div>
         <div class="commission-item">
             <span class="label">Seller Commission:</span>
-            <span class="value">{data['seller_commission']} %</span>
+            <span class="value">{data["seller_commission"]} %</span>
         </div>
         <div class="trade-status">
             <span class="label">Can Trade:</span>
-            <span class="{'status-true' if data['can_trade'] else 'status-false'}">{'✔ Yes' if data['can_trade'] else '✖ No'}</span>
+            <span class="{"status-true" if data["can_trade"] else "status-false"}">{"✔ Yes" if data["can_trade"] else "✖ No"}</span>
         </div>
         <div class="trade-status">
             <span class="label">Can Deposit:</span>
-            <span class="{'status-true' if data['can_deposit'] else 'status-false'}">{'✔ Yes' if data['can_deposit'] else '✖ No'}</span>
+            <span class="{"status-true" if data["can_deposit"] else "status-false"}">{"✔ Yes" if data["can_deposit"] else "✖ No"}</span>
         </div>
         <div class="trade-status">
             <span class="label">Can Withdraw:</span>
-            <span class="{'status-true' if data['can_withdraw'] else 'status-false'}">{'✔ Yes' if data['can_withdraw'] else '✖ No'}</span>
+            <span class="{"status-true" if data["can_withdraw"] else "status-false"}">{"✔ Yes" if data["can_withdraw"] else "✖ No"}</span>
         </div>
     </div>
     """
@@ -384,24 +412,43 @@ def show_connected_exchanges():
     
     """
 
-
-    html_text +="""
+    html_text += """
     <div class="exchlist-wrapper">
       <div class="exchlist-grid">
     """
 
     exchange_status_dict = {
-        'Binance API': ("https://www.svgrepo.com/show/331309/binance.svg", st.session_state["binance_api_status"]),
-        'Binance Testnet API': ("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLam1p6JIV4q4T2uxKEInrw5_YCqmJ8Le5aQ&s", st.session_state["binance_testnet_api_status"]),
-        'Kraken API': ("https://media.licdn.com/dms/image/D4E0BAQFm8yg0gGJN1A/company-logo_200_200/0/1697458897774/krakenfx_logo?e=2147483647&v=beta&t=CTWrqJakEEIx4lAPmddjLjt7e4Xi0HQqDTi7k9p3RPM", st.session_state["kraken_api_status"]),
-        'Coinbase API': ("https://alternative.me/media/256/coinbase-icon-kdtz42w4efva6qiu-c.png", st.session_state["coinbase_api_status"]),
-        'Coinbase Sandbox API': ("https://back.gainium.io/uploads/Coinbase_Pro_d32bc1e094.jpeg", st.session_state["coinbase_sandbox_api_status"]),
-        'Mock Exchange API': ("https://cdn-icons-png.flaticon.com/512/994/994152.png", st.session_state["mock_exchange_api_status"]),
-        'Uniswap': ("https://www.freelogovectors.net/wp-content/uploads/2021/10/uniswap-logo-freelogovectors.net_.png", "Unavailable")
-        }
+        "Binance API": (
+            "https://www.svgrepo.com/show/331309/binance.svg",
+            st.session_state["binance_api_status"],
+        ),
+        "Binance Testnet API": (
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLam1p6JIV4q4T2uxKEInrw5_YCqmJ8Le5aQ&s",
+            st.session_state["binance_testnet_api_status"],
+        ),
+        "Kraken API": (
+            "https://media.licdn.com/dms/image/D4E0BAQFm8yg0gGJN1A/company-logo_200_200/0/1697458897774/krakenfx_logo?e=2147483647&v=beta&t=CTWrqJakEEIx4lAPmddjLjt7e4Xi0HQqDTi7k9p3RPM",
+            st.session_state["kraken_api_status"],
+        ),
+        "Coinbase API": (
+            "https://alternative.me/media/256/coinbase-icon-kdtz42w4efva6qiu-c.png",
+            st.session_state["coinbase_api_status"],
+        ),
+        "Coinbase Sandbox API": (
+            "https://back.gainium.io/uploads/Coinbase_Pro_d32bc1e094.jpeg",
+            st.session_state["coinbase_sandbox_api_status"],
+        ),
+        "Mock Exchange API": (
+            "https://cdn-icons-png.flaticon.com/512/994/994152.png",
+            st.session_state["mock_exchange_api_status"],
+        ),
+        "Uniswap": (
+            "https://www.freelogovectors.net/wp-content/uploads/2021/10/uniswap-logo-freelogovectors.net_.png",
+            "Unavailable",
+        ),
+    }
 
     for k, v in exchange_status_dict.items():
-
         if v[1] == "Active":
             html_text += """<div class="exchlist-card exchlist-status-active">"""
         elif v[1] == "Empty Credentials":
@@ -411,7 +458,7 @@ def show_connected_exchanges():
         else:
             html_text += """<div class="exchlist-card exchlist-status-unavailable">"""
 
-        html_text +=f"""
+        html_text += f"""
           <img src="{v[0]}" class="exchlist-avatar" />
           <div class="exchlist-text">
             <div class="exchlist-name">{k}</div>
@@ -425,4 +472,3 @@ def show_connected_exchanges():
     </div>
     """
     st.html(html_text)
-

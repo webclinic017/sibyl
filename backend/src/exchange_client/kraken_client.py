@@ -1,17 +1,16 @@
+from typing import Any
+
 from backend.src.exchange_client.exchange_client import ExchangeAPIClient
 from database.api_keys_db_client import APIEncryptedDatabase
-from typing import Optional, Dict, Any, List, Union
 
 
 class KrakenClient(ExchangeAPIClient):
-
     def __init__(self):
         super().__init__()
-        self.name = 'kraken'
-        self.api_base_url = ''
+        self.name = "kraken"
+        self.api_base_url = ""
         api_creds = APIEncryptedDatabase.get_api_key_by_name(self.name)
         self.client = None
-
 
     def check_status(self) -> str:
         """
@@ -23,10 +22,20 @@ class KrakenClient(ExchangeAPIClient):
                   - 'Active' if the API credentials are valid.
                   - 'Invalid Credentials' if the API credentials are incorrect or expired.
         """
-        return 'Unavailable'
+        return "Unavailable"
 
-
-    def place_spot_order(self, order_type: str, quote_asset: str, base_asset: str, side: str, quantity: float, price: Optional[float] = None, stop_price: Optional[float] = None, take_profit_price: Optional[float] = None, time_in_force: Optional[str] = None) -> Dict[str, Any]:
+    def place_spot_order(
+        self,
+        order_type: str,
+        quote_asset: str,
+        base_asset: str,
+        side: str,
+        quantity: float,
+        price: float | None = None,
+        stop_price: float | None = None,
+        take_profit_price: float | None = None,
+        time_in_force: str | None = None,
+    ) -> dict[str, Any]:
         """
         Places an order on Exchange based on the given parameters.
 
@@ -49,8 +58,18 @@ class KrakenClient(ExchangeAPIClient):
 
         pass
 
-
-    def place_spot_test_order(self, order_type: str, quote_asset: str, base_asset: str, side: str, quantity: float, price: Optional[float] = None, stop_price: Optional[float] = None, take_profit_price: Optional[float] = None, time_in_force: Optional[str] = None) -> Dict[str, str]:
+    def place_spot_test_order(
+        self,
+        order_type: str,
+        quote_asset: str,
+        base_asset: str,
+        side: str,
+        quantity: float,
+        price: float | None = None,
+        stop_price: float | None = None,
+        take_profit_price: float | None = None,
+        time_in_force: str | None = None,
+    ) -> dict[str, str]:
         """
         Same as place_spot_order but to test if the trade is possible.
 
@@ -61,8 +80,7 @@ class KrakenClient(ExchangeAPIClient):
         """
         pass
 
-
-    def get_account_information(self) -> Dict[str, Any]:
+    def get_account_information(self) -> dict[str, Any]:
         """
         Fetches the account information from the exchange, including the commission rates
         (maker, taker, buyer, and seller) and the account's ability to perform trading,
@@ -89,8 +107,7 @@ class KrakenClient(ExchangeAPIClient):
         """
         pass
 
-
-    def get_spot_balance(self, quote_asset_pair_price: str = None) -> Dict[str, Any]:
+    def get_spot_balance(self, quote_asset_pair_price: str = None) -> dict[str, Any]:
         """
         Retrieve the user's spot balance, including free and locked amounts, along with current prices.
 
@@ -103,8 +120,7 @@ class KrakenClient(ExchangeAPIClient):
         """
         pass
 
-
-    def get_available_assets(self, quote_asset: str = "all") -> Optional[Dict[str, List[str]]]:
+    def get_available_assets(self, quote_asset: str = "all") -> dict[str, list[str]] | None:
         """
         Fetches available trading pairs from Kraken and groups them by quote asset.
 
@@ -124,8 +140,14 @@ class KrakenClient(ExchangeAPIClient):
         """
         pass
 
-
-    def get_klines(self, symbol: str, interval: str, limit: int, start_time: int = None, end_time: int = None) -> Optional[List[Dict[str, float]]]:
+    def get_klines(
+        self,
+        symbol: str,
+        interval: str,
+        limit: int,
+        start_time: int = None,
+        end_time: int = None,
+    ) -> list[dict[str, float]] | None:
         """
         Fetches historical OHLCV data for a given symbol from the client.
 
@@ -142,8 +164,7 @@ class KrakenClient(ExchangeAPIClient):
         """
         pass
 
-
-    def get_symbol_info(self, symbol: str) -> Dict[str, Any] | None:
+    def get_symbol_info(self, symbol: str) -> dict[str, Any] | None:
         """
         Retrieves information about a specific symbol pair.
 
@@ -159,8 +180,7 @@ class KrakenClient(ExchangeAPIClient):
         """
         pass
 
-
-    def get_minimum_trade_value(self, symbol: str) -> Optional[Dict[str, Union[float, str]]]:
+    def get_minimum_trade_value(self, symbol: str) -> dict[str, float | str] | None:
         """
         Retrieves the minimum trade value required for a given trading pair.
 
@@ -179,7 +199,6 @@ class KrakenClient(ExchangeAPIClient):
         """
         pass
 
-
     def get_pair_market_price(self, pair_symbol: str) -> float | None:
         """
         Function to get the current price of an asset in a specific quote currency using Exchange API.
@@ -188,7 +207,6 @@ class KrakenClient(ExchangeAPIClient):
         :return: Current price of the asset in the specified quote currency
         """
         pass
-
 
     def add_spot_order_to_trade_history_db(self, quote_asset: str, base_asset: str, trade_dict: dict) -> bool:
         """
@@ -202,8 +220,7 @@ class KrakenClient(ExchangeAPIClient):
         """
         pass
 
-
-    def get_orderbook(self, quote_asset: str, base_asset: str, limit: int) ->Optional[List[List[Dict[str, float]]]]:
+    def get_orderbook(self, quote_asset: str, base_asset: str, limit: int) -> list[list[dict[str, float]]] | None:
         """
         Fetches the order book for a given trading pair from Kraken API and formats the data.
 

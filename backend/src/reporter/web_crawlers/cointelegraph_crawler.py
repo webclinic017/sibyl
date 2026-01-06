@@ -1,7 +1,7 @@
+import re
+
 import requests
 from bs4 import BeautifulSoup
-from typing import List, Tuple
-import re
 
 
 def clean_text(text: str):
@@ -10,7 +10,9 @@ def clean_text(text: str):
     return text.strip()  # Remove any extra spaces
 
 
-def fetch_crypto_articles_from_cointelegraph(limit: int = 10) -> List[Tuple[str, str, str, str]]:
+def fetch_crypto_articles_from_cointelegraph(
+    limit: int = 10,
+) -> list[tuple[str, str, str, str]]:
     """
     Fetches the titles and text of the latest crypto-related articles from CoinTelegraph.
 
@@ -31,21 +33,21 @@ def fetch_crypto_articles_from_cointelegraph(limit: int = 10) -> List[Tuple[str,
         return []
 
     # Parse the page content with BeautifulSoup
-    soup = BeautifulSoup(response.content, 'html.parser')
+    soup = BeautifulSoup(response.content, "html.parser")
 
     # Find all article containers
-    articles = soup.find_all('span', attrs='post-card-inline__title')
+    articles = soup.find_all("span", attrs="post-card-inline__title")
 
     # List to store article titles and their texts
-    articles_list: List[Tuple[str, str, str, str]] = []
+    articles_list: list[tuple[str, str, str, str]] = []
 
     # Iterate over articles up to the limit and extract titles and URLs
     for article in articles[:limit]:
         title_text = article.get_text(strip=True)
-        link = article.find_parent('a')  # Find the link to the full article
-        subtitle = link.find_next('p', attrs='post-card-inline__text')
-        if link and 'href' in link.attrs:
-            article_url = "https://cointelegraph.com" + link['href']  # Construct the full URL
+        link = article.find_parent("a")  # Find the link to the full article
+        subtitle = link.find_next("p", attrs="post-card-inline__text")
+        if link and "href" in link.attrs:
+            article_url = "https://cointelegraph.com" + link["href"]  # Construct the full URL
             # Fetch the article content from the individual article page
             article_content = fetch_article_text(article_url)
             article_text = clean_text(article_content)
@@ -70,12 +72,11 @@ def fetch_article_text(url: str) -> str:
         return "Content not available"
 
     # Parse the article content with BeautifulSoup
-    soup = BeautifulSoup(response.content, 'html.parser')
+    soup = BeautifulSoup(response.content, "html.parser")
 
     # Find the article content
-    article_content = soup.find('div', attrs='post__content-wrapper')  # Adjust based on website's structure
+    article_content = soup.find("div", attrs="post__content-wrapper")  # Adjust based on website's structure
     if article_content:
         return article_content.get_text(strip=True)
     else:
         return "Content not available"
-

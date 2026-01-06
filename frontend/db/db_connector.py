@@ -1,8 +1,7 @@
-import sqlite3
 import os
-from streamlit import cache_resource
-from dotenv import load_dotenv
+import sqlite3
 
+from dotenv import load_dotenv
 
 """
 This script uses the sqlite3 module to connect to an SQLite database file called frontend.db. 
@@ -11,8 +10,9 @@ exchange, llm_source, llm_type, llm_name, backend_server_ip, backend_server_port
 The table has an additional primary key field called id for unique identification of each record.
 """
 
-load_dotenv('frontend/config/config.env')
+load_dotenv("frontend/config/config.env")
 DB_PATH = os.getenv("FRONTEND_DB_PATH")
+
 
 def db_init() -> int:
     # Check if the database file already exists
@@ -40,7 +40,7 @@ def db_init() -> int:
     insert_default_query = """INSERT INTO user_configuration(exchange, backend_server_ip,backend_server_port,backend_server_secure)
                   VALUES("Binance", "127.0.0.1", 8000, 0);"""
     cursor.execute(insert_default_query)
-    conn.commit() # Save the changes
+    conn.commit()  # Save the changes
     # Close the cursor and the connection
     cursor.close()
     conn.close()
@@ -58,14 +58,15 @@ def fetch_fields() -> dict:
     cursor.close()
     conn.close()
 
-    res = {"exchange": rows[0][1],
-           "llm_source": rows[0][2],
-           "llm_type": rows[0][3],
-           "llm_name": rows[0][4],
-           "backend_server_ip": rows[0][5],
-           "backend_server_port": rows[0][6],
-           "backend_server_secure": rows[0][7]
-           }
+    res = {
+        "exchange": rows[0][1],
+        "llm_source": rows[0][2],
+        "llm_type": rows[0][3],
+        "llm_name": rows[0][4],
+        "backend_server_ip": rows[0][5],
+        "backend_server_port": rows[0][6],
+        "backend_server_secure": rows[0][7],
+    }
     return res
 
 
@@ -78,17 +79,29 @@ def fetch_llm_config() -> dict | None:
     cursor.close()
     conn.close()
     if rows[0][0] and rows[0][1] and rows[0][2]:
-        return {"llm_source": rows[0][0], "llm_type": rows[0][1], "llm_name": rows[0][2]}
+        return {
+            "llm_source": rows[0][0],
+            "llm_type": rows[0][1],
+            "llm_name": rows[0][2],
+        }
     else:
         return None
 
 
-def update_fields(exchange: str = None, llm_source: str = None, llm_type: str = None, llm_name: str = None, backend_server_ip: str = None,
-                  backend_server_port: int = None, backend_server_secure: int = None) -> int:
+def update_fields(
+    exchange: str = None,
+    llm_source: str = None,
+    llm_type: str = None,
+    llm_name: str = None,
+    backend_server_ip: str = None,
+    backend_server_port: int = None,
+    backend_server_secure: int = None,
+) -> int:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     # Update the fields if arguments are not None
-    cursor.execute("""UPDATE user_configuration SET
+    cursor.execute(
+        """UPDATE user_configuration SET
                       exchange = COALESCE(?, exchange),
                       llm_source = COALESCE(?, llm_source),
                       llm_type = COALESCE(?, llm_type),
@@ -96,8 +109,16 @@ def update_fields(exchange: str = None, llm_source: str = None, llm_type: str = 
                       backend_server_ip = COALESCE(?, backend_server_ip),
                       backend_server_port = COALESCE(?, backend_server_port),
                       backend_server_secure = COALESCE(?, backend_server_secure)""",
-                   (exchange, llm_source, llm_type, llm_name, backend_server_ip,
-                    backend_server_port, backend_server_secure))
+        (
+            exchange,
+            llm_source,
+            llm_type,
+            llm_name,
+            backend_server_ip,
+            backend_server_port,
+            backend_server_secure,
+        ),
+    )
     conn.commit()
     cursor.close()
     conn.close()

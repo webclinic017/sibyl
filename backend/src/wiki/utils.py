@@ -1,4 +1,5 @@
 import os
+
 from database.api_keys_db_client import APIEncryptedDatabase
 
 CHROMA_DB_PATH = "database/wiki_rag/chroma_db"

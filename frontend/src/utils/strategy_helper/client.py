@@ -1,11 +1,23 @@
-from typing import Dict, Any, List
+from typing import Any
+
 import requests
-from frontend.config.config import BACKEND_SERVER_ADDRESS
 from streamlit import cache_data
 
+from frontend.config.config import BACKEND_SERVER_ADDRESS
 
-def post_strategy(exchange: str, quote_asset: str, quote_amount: float, base_asset: str, time_interval: str, strategy: str, num_trades: int, dataset_size: int, params: Dict[str, Any], backtesting: bool = False) -> Dict[str, Any] | None:
 
+def post_strategy(
+    exchange: str,
+    quote_asset: str,
+    quote_amount: float,
+    base_asset: str,
+    time_interval: str,
+    strategy: str,
+    num_trades: int,
+    dataset_size: int,
+    params: dict[str, Any],
+    backtesting: bool = False,
+) -> dict[str, Any] | None:
     if strategy.startswith("[Sibyl] "):
         strategy = strategy.replace("[Sibyl] ", "")
     strategy = strategy.lower().replace(" ", "_")
@@ -19,9 +31,13 @@ def post_strategy(exchange: str, quote_asset: str, quote_amount: float, base_ass
         "strategy": strategy,
         "num_trades": num_trades,
         "dataset_size": dataset_size,
-        "params": params
+        "params": params,
     }
-    url = f"{BACKEND_SERVER_ADDRESS}/broker/strategy/backtest/start" if backtesting else f"{BACKEND_SERVER_ADDRESS}/broker/strategy/start"
+    url = (
+        f"{BACKEND_SERVER_ADDRESS}/broker/strategy/backtest/start"
+        if backtesting
+        else f"{BACKEND_SERVER_ADDRESS}/broker/strategy/start"
+    )
 
     response = requests.post(url=url, json=payload)
 
@@ -32,7 +48,6 @@ def post_strategy(exchange: str, quote_asset: str, quote_amount: float, base_ass
 
 
 def stop_strategy(strategy_id: str):
-
     url = f"{BACKEND_SERVER_ADDRESS}/broker/strategy/status/stop?strategy_id={strategy_id}"
 
     response = requests.get(url=url)
@@ -44,7 +59,6 @@ def stop_strategy(strategy_id: str):
 
 
 def get_strategy_metadata(strategy_id: str):
-
     url = f"{BACKEND_SERVER_ADDRESS}/broker/strategy/metadata?strategy_id={strategy_id}"
 
     response = requests.get(url=url)
@@ -56,7 +70,6 @@ def get_strategy_metadata(strategy_id: str):
 
 
 def get_strategy_logs(strategy_id: str, from_timestamp: int = None):
-
     url = f"{BACKEND_SERVER_ADDRESS}/broker/strategy/logs?strategy_id={strategy_id}"
     if from_timestamp:
         url += f"&from_timestamp={from_timestamp}"
@@ -69,8 +82,7 @@ def get_strategy_logs(strategy_id: str, from_timestamp: int = None):
         return None
 
 
-def get_strategy_evaluation(strategy_id: str) -> Dict[str, Any] | None:
-
+def get_strategy_evaluation(strategy_id: str) -> dict[str, Any] | None:
     url = f"{BACKEND_SERVER_ADDRESS}/broker/strategy/evaluation?strategy_id={strategy_id}"
 
     response = requests.get(url=url)
@@ -81,8 +93,7 @@ def get_strategy_evaluation(strategy_id: str) -> Dict[str, Any] | None:
 
 
 @cache_data(ttl=100000)
-def get_available_strategies() -> List[str]:
-
+def get_available_strategies() -> list[str]:
     url = f"{BACKEND_SERVER_ADDRESS}/broker/strategies"
 
     response = requests.get(url=url)

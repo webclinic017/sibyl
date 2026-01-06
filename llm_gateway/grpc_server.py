@@ -1,13 +1,14 @@
-import grpc
+import os
 from concurrent import futures
+
+import grpc
 import inference_pb2
 import inference_pb2_grpc
-from llm_gateway.llm_models.llm_client_factory import LLMClientFactory
-from llm_gateway.agents.agent_factory import AgentFactory
-from database.api_keys_db_client import APIEncryptedDatabase
 from dotenv import load_dotenv
-import os
 
+from database.api_keys_db_client import APIEncryptedDatabase
+from llm_gateway.agents.agent_factory import AgentFactory
+from llm_gateway.llm_models.llm_client_factory import LLMClientFactory
 
 
 class InferenceService(inference_pb2_grpc.InferenceServiceServicer):
@@ -23,7 +24,6 @@ class InferenceService(inference_pb2_grpc.InferenceServiceServicer):
         """Initializes the InferenceService with no model loaded."""
         self.llm = None
         self.agent = None
-
 
     def Predict(self, request, context: grpc.ServicerContext) -> inference_pb2.PredictResponse:
         """
@@ -45,7 +45,6 @@ class InferenceService(inference_pb2_grpc.InferenceServiceServicer):
         self.llm.initialize_model()
         response_text = self.llm.generate_response(request.input_text)
         return inference_pb2.PredictResponse(output_text=response_text)
-
 
     def AgentExecute(self, request, context: grpc.ServicerContext) -> inference_pb2.AgentResponse:
         """
@@ -76,8 +75,8 @@ def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     inference_pb2_grpc.add_InferenceServiceServicer_to_server(InferenceService(), server)
 
-    load_dotenv('llm_gateway/server_config.env')
-    server.add_insecure_port(f"{os.getenv("GRPC_INFERENCE_SERVER_IP")}:{os.getenv("GRPC_INFERENCE_SERVER_PORT")}")
+    load_dotenv("llm_gateway/server_config.env")
+    server.add_insecure_port(f"{os.getenv('GRPC_INFERENCE_SERVER_IP')}:{os.getenv('GRPC_INFERENCE_SERVER_PORT')}")
     server.start()
     server.wait_for_termination()
 

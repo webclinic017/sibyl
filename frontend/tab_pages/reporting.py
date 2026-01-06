@@ -1,17 +1,26 @@
 import streamlit as st
-from frontend.src.utils.oracle.ui_elements import oracle_button
-from frontend.src.utils.ui_elements import fix_page_layout, set_page_title
-from frontend.src.utils.reporter_helper.funcs import get_latest_news,get_fear_and_greed_index_gauge_plot, get_news_summary, get_news_sentiment, oracle_news_chatbot
-from frontend.src.utils.oracle.ui_elements import oracle_button
-from frontend.db.db_connector import fetch_llm_config
 
+from frontend.db.db_connector import fetch_llm_config
+from frontend.src.utils.oracle.ui_elements import oracle_button
+from frontend.src.utils.reporter_helper.funcs import (
+    get_fear_and_greed_index_gauge_plot,
+    get_latest_news,
+    get_news_sentiment,
+    get_news_summary,
+    oracle_news_chatbot,
+)
+from frontend.src.utils.ui_elements import fix_page_layout, set_page_title
 
 fix_page_layout("Report")
 set_page_title("Crypto Report")
 
-st.sidebar.selectbox(label="Source Website", options=['Cointelegraph', 'Coindesk', 'Decrypt'], disabled=True)
-nlp_model_summ = st.sidebar.selectbox(label="Summarization NLP Model", options=['sumy', 'spacy', 'nltk'], index=0)
-st.sidebar.selectbox(label="Sentiment NLP Model", options=['Vader'])
+st.sidebar.selectbox(
+    label="Source Website",
+    options=["Cointelegraph", "Coindesk", "Decrypt"],
+    disabled=True,
+)
+nlp_model_summ = st.sidebar.selectbox(label="Summarization NLP Model", options=["sumy", "spacy", "nltk"], index=0)
+st.sidebar.selectbox(label="Sentiment NLP Model", options=["Vader"])
 
 
 st.html("""
@@ -55,23 +64,24 @@ st.html("""
 """)
 
 
-cols = st.columns([4, 2], gap='medium')
+cols = st.columns([4, 2], gap="medium")
 with cols[0]:
-    with st.spinner('Fetching News Summary from NLP Model...'):
-        get_news_summary(nlp_model_summ, 'cointelegraph')
+    with st.spinner("Fetching News Summary from NLP Model..."):
+        get_news_summary(nlp_model_summ, "cointelegraph")
 with cols[1]:
-    with st.spinner('Calculating News Sentiment...'):
+    with st.spinner("Calculating News Sentiment..."):
         with st.container():
             get_news_sentiment()
             st.caption(
-                "The Sentiment Index on the right is created using the NLP Model based on the news fetched by the Web Scrapper Module.")
+                "The Sentiment Index on the right is created using the NLP Model based on the news fetched by the Web Scrapper Module."
+            )
 
-tabs = st.tabs(['Crypto Sentiment Indexes', 'Latest Articles'])
+tabs = st.tabs(["Crypto Sentiment Indexes", "Latest Articles"])
 with tabs[0]:
     get_fear_and_greed_index_gauge_plot()
 with tabs[1]:
     # st.subheader('Coinbase News')
-    with st.spinner('Fetching Latest Crypto News from Cointelegraph'):
+    with st.spinner("Fetching Latest Crypto News from Cointelegraph"):
         get_latest_news()
 
 
@@ -85,5 +95,6 @@ if oracle_status:
         oracle_news_chatbot()
 else:
     st.info(
-        "💡Configure an LLM API or Local LLM and activate the **Oracle** in the settings tab in order to get the Oracle News Chatbot.")
+        "💡Configure an LLM API or Local LLM and activate the **Oracle** in the settings tab in order to get the Oracle News Chatbot."
+    )
     oracle_button(module="reporting", enabled=False)

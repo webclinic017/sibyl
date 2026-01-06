@@ -1,6 +1,9 @@
-from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import BaseStrategy
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import (
+    BaseStrategy,
+)
 
 
 class ImpulseBreakoutStrategy(BaseStrategy):
@@ -15,10 +18,19 @@ class ImpulseBreakoutStrategy(BaseStrategy):
     Inspired by Freqtrade's CombinedBinHClucAndMADV3
     """
 
-    def __init__(self, bb_window: int = 20, bb_std_dev: float = 2.0,
-                 rsi_window: int = 14, ema_short: int = 9, ema_long: int = 21,
-                 macd_short: int = 12, macd_long: int = 26, macd_signal: int = 9,
-                 adx_window: int = 14, volume_factor: float = 1.5) -> None:
+    def __init__(
+        self,
+        bb_window: int = 20,
+        bb_std_dev: float = 2.0,
+        rsi_window: int = 14,
+        ema_short: int = 9,
+        ema_long: int = 21,
+        macd_short: int = 12,
+        macd_long: int = 26,
+        macd_signal: int = 9,
+        adx_window: int = 14,
+        volume_factor: float = 1.5,
+    ) -> None:
         """
         Initializes the strategy parameters.
 
@@ -49,7 +61,6 @@ class ImpulseBreakoutStrategy(BaseStrategy):
         self.name = "Impulse Breakout Strategy"
         self.is_price_only = False
 
-
     def calculate_indicators(self, data: pd.DataFrame) -> None:
         """
         Computes Bollinger Bands, RSI, MACD, ADX, and Volume indicators.
@@ -76,8 +87,10 @@ class ImpulseBreakoutStrategy(BaseStrategy):
         data["EMA_Long"] = data["close_price"].ewm(span=self.ema_long, adjust=False).mean()
 
         # MACD Calculation
-        data["MACD"] = data["close_price"].ewm(span=self.macd_short, adjust=False).mean() - \
-                       data["close_price"].ewm(span=self.macd_long, adjust=False).mean()
+        data["MACD"] = (
+            data["close_price"].ewm(span=self.macd_short, adjust=False).mean()
+            - data["close_price"].ewm(span=self.macd_long, adjust=False).mean()
+        )
         data["MACD_Signal"] = data["MACD"].ewm(span=self.macd_signal, adjust=False).mean()
 
         # ADX Calculation
@@ -86,7 +99,6 @@ class ImpulseBreakoutStrategy(BaseStrategy):
         # Volume Spike Detection
         data["Avg_Volume"] = data["volume"].rolling(window=self.bb_window).mean()
         data["Volume_Spike"] = data["volume"] > (self.volume_factor * data["Avg_Volume"])
-
 
     def generate_signals(self, data: pd.DataFrame) -> pd.DataFrame:
         """
@@ -97,30 +109,42 @@ class ImpulseBreakoutStrategy(BaseStrategy):
 
         # Buy Conditions
         buy_condition = (
-                (self.data["RSI"] < 35) &  # RSI near oversold
-                (self.data["EMA_Short"] > self.data["EMA_Long"]) &  # EMA Uptrend
-                (self.data["MACD"] > self.data["MACD_Signal"]) &  # MACD bullish crossover
-                (self.data["ADX"] > 25) &  # Trend strength confirmation
-                (self.data["close_price"] < self.data["lower_band"]) &  # Near lower BB
-                (self.data["Volume_Spike"])  # High volume confirmation
+            (self.data["RSI"] < 35)  # RSI near oversold
+            & (self.data["EMA_Short"] > self.data["EMA_Long"])  # EMA Uptrend
+            & (self.data["MACD"] > self.data["MACD_Signal"])  # MACD bullish crossover
+            & (self.data["ADX"] > 25)  # Trend strength confirmation
+            & (self.data["close_price"] < self.data["lower_band"])  # Near lower BB
+            & (self.data["Volume_Spike"])  # High volume confirmation
         )
 
         # Sell Conditions
         sell_condition = (
-                (self.data["RSI"] > 65) &  # RSI near overbought
-                (self.data["EMA_Short"] < self.data["EMA_Long"]) &  # EMA Downtrend
-                (self.data["MACD"] < self.data["MACD_Signal"]) &  # MACD bearish crossover
-                (self.data["ADX"] > 25) &  # Trend strength confirmation
-                (self.data["close_price"] > self.data["upper_band"]) &  # Near upper BB
-                (self.data["Volume_Spike"])  # High volume confirmation
+            (self.data["RSI"] > 65)  # RSI near overbought
+            & (self.data["EMA_Short"] < self.data["EMA_Long"])  # EMA Downtrend
+            & (self.data["MACD"] < self.data["MACD_Signal"])  # MACD bearish crossover
+            & (self.data["ADX"] > 25)  # Trend strength confirmation
+            & (self.data["close_price"] > self.data["upper_band"])  # Near upper BB
+            & (self.data["Volume_Spike"])  # High volume confirmation
         )
 
-        self.data["signal"] = np.where(buy_condition, "BUY",
-                                       np.where(sell_condition, "SELL", "HOLD"))
+        self.data["signal"] = np.where(buy_condition, "BUY", np.where(sell_condition, "SELL", "HOLD"))
 
-        return self.data[["timestamp", "close_price", "upper_band", "lower_band", "RSI",
-                          "EMA_Short", "EMA_Long", "MACD", "MACD_Signal", "ADX",
-                          "Volume_Spike", "signal"]]
+        return self.data[
+            [
+                "timestamp",
+                "close_price",
+                "upper_band",
+                "lower_band",
+                "RSI",
+                "EMA_Short",
+                "EMA_Long",
+                "MACD",
+                "MACD_Signal",
+                "ADX",
+                "Volume_Spike",
+                "signal",
+            ]
+        ]
 
 
 # 96049.3711205 USDT

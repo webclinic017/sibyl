@@ -1,5 +1,6 @@
-from langchain.agents import Tool
 from duckduckgo_search import DDGS
+from langchain.agents import Tool
+
 from llm_gateway.tools.base_tool import BaseTool
 
 
@@ -19,14 +20,12 @@ class WebSearchTool(BaseTool):
         """
         self.max_results = max_results
 
-
     def search(self, query: str) -> str:
         """
         Perform a web search using DuckDuckGo and return the top results.
         """
         results = DDGS().text(keywords=query, max_results=self.max_results)
         return "\n".join([r["body"] for r in results]) if results else "No web results found."
-
 
     def as_langchain_tool(self) -> Tool:
         """
@@ -35,5 +34,5 @@ class WebSearchTool(BaseTool):
         return Tool(
             name="WebSearch",
             func=self.search,
-            description="Use to search the web when document search fails or lacks context."
+            description="Use to search the web when document search fails or lacks context.",
         )

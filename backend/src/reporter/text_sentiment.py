@@ -1,17 +1,18 @@
-from nltk import sent_tokenize
 # from nltk.sentiment import SentimentIntensityAnalyzer
-from nltk import data, download
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer  # Use vaderSentiment instead of NLTK
+from nltk import data, download, sent_tokenize
+from vaderSentiment.vaderSentiment import (
+    SentimentIntensityAnalyzer,
+)  # Use vaderSentiment instead of NLTK
 
 try:
-    data.find('tokenizers/punkt_tab/english.pickle')
+    data.find("tokenizers/punkt_tab/english.pickle")
 except LookupError:
-    download('punkt_tab')
+    download("punkt_tab")
 
 try:
-    data.find('sentiment/vader_lexicon.zip')
+    data.find("sentiment/vader_lexicon.zip")
 except LookupError:
-    download('vader_lexicon')
+    download("vader_lexicon")
 
 # try:
 #     data.find('tokenizers/punkt.zip')
@@ -19,7 +20,7 @@ except LookupError:
 #     download('punkt')
 
 
-def get_text_sentiment(model: str = 'vader', articles=None):
+def get_text_sentiment(model: str = "vader", articles=None):
     doc = ""
 
     if articles is not None:
@@ -28,7 +29,7 @@ def get_text_sentiment(model: str = 'vader', articles=None):
                 doc += article[0] + ". " + article[1]
                 for p in article[3]:
                     doc += p
-        if model == 'vader':
+        if model == "vader":
             return vader_text_sentiment(doc)
         else:  # DEFAULT
             return vader_text_sentiment(doc)
@@ -42,7 +43,7 @@ def vader_text_sentiment(doc: str):
     sentences = sent_tokenize(doc)  # Tokenize article into sentences
 
     # Aggregate sentiment scores
-    aggregate_score = {'neg': 0.0, 'neu': 0.0, 'pos': 0.0, 'compound': 0.0}
+    aggregate_score = {"neg": 0.0, "neu": 0.0, "pos": 0.0, "compound": 0.0}
     for sentence in sentences:
         scores = sid.polarity_scores(sentence)
         for key, value in scores.items():
@@ -51,5 +52,5 @@ def vader_text_sentiment(doc: str):
     # Normalize aggregate score
     num_sentences = len(sentences)
     aggregate_score = {key: value / num_sentences for key, value in aggregate_score.items()}
-    res = round(aggregate_score['compound'], 2)
+    res = round(aggregate_score["compound"], 2)
     return res

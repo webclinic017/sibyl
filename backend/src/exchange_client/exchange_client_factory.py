@@ -5,14 +5,15 @@ from backend.src.exchange_client.coinbase_sandbox_client import CoinbaseSandboxC
 from backend.src.exchange_client.kraken_client import KrakenClient
 from backend.src.exchange_client.mock_exchance_client import MockExchangeClient
 
+
 class ExchangeClientFactory:
     _clients = {
-        'binance': BinanceClient,
-        'binance_testnet': BinanceTestnetClient,
-        'coinbase': CoinbaseClient,
-        'coinbase_sandbox': CoinbaseSandboxClient,
-        'kraken': KrakenClient,
-        'mock_exchange': MockExchangeClient
+        "binance": BinanceClient,
+        "binance_testnet": BinanceTestnetClient,
+        "coinbase": CoinbaseClient,
+        "coinbase_sandbox": CoinbaseSandboxClient,
+        "kraken": KrakenClient,
+        "mock_exchange": MockExchangeClient,
     }
 
     @classmethod

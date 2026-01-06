@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Dict
 
 
 class AssetBalance(BaseModel):
@@ -9,7 +8,7 @@ class AssetBalance(BaseModel):
 
 
 class SpotBalanceResponse(BaseModel):
-    spot_balances: Dict[str, AssetBalance]
+    spot_balances: dict[str, AssetBalance]
 
 
 class AccountInformation(BaseModel):

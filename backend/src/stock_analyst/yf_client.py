@@ -1,5 +1,6 @@
-import yfinance as yf
 from typing import Any
+
+import yfinance as yf
 from numpy import isnan
 
 
@@ -46,7 +47,9 @@ def get_stock_details(stock_symbol: str) -> dict:
         # Analyst recommendations
         "sustainability": stock.sustainability.to_dict() if stock.sustainability is not None else {},  # ESG scores
         "major_holders": stock.major_holders.to_dict() if stock.major_holders is not None else {},  # Major holders
-        "institutional_holders": stock.institutional_holders.to_dict() if stock.institutional_holders is not None else {},
+        "institutional_holders": stock.institutional_holders.to_dict()
+        if stock.institutional_holders is not None
+        else {},
         # Institutional holders
         "dividends": stock.dividends.to_list() if stock.dividends is not None else [],  # Dividends history
         "splits": stock.splits.to_list() if stock.splits is not None else [],  # Stock splits history

@@ -1,23 +1,21 @@
-from typing import List, Dict, Any, Optional
+from typing import Any
+
+import numpy as np
 import pandas as pd
 from ta.momentum import RSIIndicator
 from ta.trend import MACD, ADXIndicator
 from ta.volatility import BollingerBands
-import numpy as np
 
 
 class Analyst:
-
-    def __init__(self, klines: List[Dict[str, float]]):
+    def __init__(self, klines: list[dict[str, float]]):
         self.id = None
         self.data = self.generate_dataset(klines)
 
-
     @staticmethod
-    def generate_dataset(klines: List[Dict[str, float]]) -> pd.DataFrame:
+    def generate_dataset(klines: list[dict[str, float]]) -> pd.DataFrame:
         df = pd.DataFrame(klines)
         return df
-
 
     def calc_rsi(self, window=14):
         delta = self.data["close_price"].astype(float).diff()
@@ -26,13 +24,11 @@ class Analyst:
         RS = gain / loss
         return 100 - (100 / (1 + RS))
 
-
     def calc_ema(self, method: str, window=5):
         if method == "exponential":
             return self.data["close_price"].ewm(span=window, adjust=False).mean()
         else:
             return self.data["close_price"].rolling(window=window).mean()
-
 
     def calc_bollinger_bands(self, window=3):
         std = 2
@@ -40,13 +36,11 @@ class Analyst:
         upper_band = self.data["Moving Average"] + std * self.data["close_price"].ewm(span=window).std()
         return lower_band, upper_band
 
-
     def calc_kline_analytics(self):
         self.data["Moving Average"] = self.calc_ema("exponential", 5)
-        self.data['RSI'] = self.calc_rsi(14)
-        self.data['LowerBand'], self.data['UpperBand'] = self.calc_bollinger_bands(3)
+        self.data["RSI"] = self.calc_rsi(14)
+        self.data["LowerBand"], self.data["UpperBand"] = self.calc_bollinger_bands(3)
         return self.data.to_dict(orient="records")  # to_dict(orient='records')
-
 
     def get_market_condition_score(self) -> float:
         """
@@ -76,13 +70,16 @@ class Analyst:
             weights = [0.2, 0.3, 0.3, 0.2]  # More weight on RSI & momentum
 
         # Compute final score
-        score = (weights[0] * trend_strength) + (weights[1] * volatility) + \
-                (weights[2] * momentum) + (weights[3] * rsi_score)
+        score = (
+            (weights[0] * trend_strength)
+            + (weights[1] * volatility)
+            + (weights[2] * momentum)
+            + (weights[3] * rsi_score)
+        )
 
         return np.clip(score, 0, 100)  # Ensure the score is between 0-100
 
-
-    def get_analytics(self) -> Optional[Dict[str, Any]]:
+    def get_analytics(self) -> dict[str, Any] | None:
         try:
             klines_dict = self.calc_kline_analytics()
             score = self.get_market_condition_score()

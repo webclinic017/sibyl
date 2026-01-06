@@ -1,18 +1,17 @@
-import sqlite3
 import os
-from dotenv import load_dotenv
+import sqlite3
 
+from dotenv import load_dotenv
 
 """
 This script uses the sqlite3 module to connect to an SQLite database file called trade_history.db. 
 It creates a table named "trading_history" with the specified fields
 """
 
+
 class TradeHistoryDBClient:
-
-    load_dotenv('database/db_paths.env')
+    load_dotenv("database/db_paths.env")
     DB_PATH = os.getenv("TRADE_HISTORY_DB_PATH")
-
 
     @classmethod
     def db_init(cls):
@@ -48,20 +47,49 @@ class TradeHistoryDBClient:
         print("backend :: db :: trade_history_db_client :: Database created successfully.")
         return 0
 
-
     @classmethod
-    def add_trade_to_db(cls, exchange: str, timestamp: int, order_id: str, quote_asset: str, base_asset: str,
-                        base_quantity: float, quote_quantity: float, side: str, order_type: str, order_status: str, time_in_force: str, commission: float = None, commission_asset: str = None, self_trade_prevention_mode: str = None):
+    def add_trade_to_db(
+        cls,
+        exchange: str,
+        timestamp: int,
+        order_id: str,
+        quote_asset: str,
+        base_asset: str,
+        base_quantity: float,
+        quote_quantity: float,
+        side: str,
+        order_type: str,
+        order_status: str,
+        time_in_force: str,
+        commission: float = None,
+        commission_asset: str = None,
+        self_trade_prevention_mode: str = None,
+    ):
         conn = sqlite3.connect(cls.DB_PATH)  # Create/Connect to the SQLite database
         cursor = conn.cursor()  # Create a cursor object to execute SQL commands
 
         # # INSERT PARAMS
-        cursor.execute("""INSERT INTO trading_history(exchange, timestamp, order_id, quote_asset, base_asset, 
+        cursor.execute(
+            """INSERT INTO trading_history(exchange, timestamp, order_id, quote_asset, base_asset, 
         base_quantity, quote_quantity, side, order_type, order_status, time_in_force, commission, commission_asset,
         self_trade_prevention_mode) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                       (exchange, timestamp, order_id, quote_asset, base_asset, base_quantity, quote_quantity,
-                        side, order_type, order_status, time_in_force, commission,
-                        commission_asset, self_trade_prevention_mode))
+            (
+                exchange,
+                timestamp,
+                order_id,
+                quote_asset,
+                base_asset,
+                base_quantity,
+                quote_quantity,
+                side,
+                order_type,
+                order_status,
+                time_in_force,
+                commission,
+                commission_asset,
+                self_trade_prevention_mode,
+            ),
+        )
         # cursor.execute(insert_default_query)
         conn.commit()  # Save the changes
         cursor.close()  # Close the cursor and the connection
@@ -69,18 +97,20 @@ class TradeHistoryDBClient:
         print("database :: trade_history_db_client :: add_trade_to_db :: Database Insert successfully.")
         return 0
 
-
     @classmethod
     def fetch_trading_history(cls, date_from: str = None, date_to: str = None):
         conn = sqlite3.connect(cls.DB_PATH)
         cursor = conn.cursor()
 
-        cursor.execute(f"SELECT exchange, timestamp, order_id, quote_asset, base_asset, base_quantity, quote_quantity, side, order_type, order_status, time_in_force, commission, commission_asset, self_trade_prevention_mode FROM trading_history")
+        cursor.execute(
+            "SELECT exchange, timestamp, order_id, quote_asset, base_asset, base_quantity, quote_quantity, side, order_type, order_status, time_in_force, commission, commission_asset, self_trade_prevention_mode FROM trading_history"
+        )
         rows = cursor.fetchall()
         # print(rows)
         cursor.close()
         conn.close()
         return rows
+
     #
     #
     # @classmethod

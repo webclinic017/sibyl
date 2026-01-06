@@ -1,9 +1,13 @@
-from backend.src.analyst.analyst import Analyst
-from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import BaseStrategy
-from backend.src.exchange_client.exchange_client import ExchangeAPIClient
-import pandas as pd
-from typing import List, Dict, Any, Optional, Tuple
 import time
+from typing import Any
+
+import pandas as pd
+
+from backend.src.analyst.analyst import Analyst
+from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import (
+    BaseStrategy,
+)
+from backend.src.exchange_client.exchange_client import ExchangeAPIClient
 
 
 class Backtester:
@@ -14,7 +18,14 @@ class Backtester:
     and logs buy/sell signals over a defined period to evaluate strategy performance.
     """
 
-    def __init__(self, strategy: BaseStrategy, exchange_client: ExchangeAPIClient, symbol: str, interval: str, dataset_size: int = 3000):
+    def __init__(
+        self,
+        strategy: BaseStrategy,
+        exchange_client: ExchangeAPIClient,
+        symbol: str,
+        interval: str,
+        dataset_size: int = 3000,
+    ):
         """
         Initializes the Backtester with a trading strategy, exchange client, and market parameters.
 
@@ -34,7 +45,6 @@ class Backtester:
         self.strategy_chunk = 400  # Number of Klines given to the strategy at each step
         self.backtesting_logs = []  # Stores backtesting results
 
-
     def get_klines_data(self) -> pd.DataFrame:
         """
         Fetches historical Kline (candlestick) data from the exchange.
@@ -45,10 +55,30 @@ class Backtester:
         Returns:
             pd.DataFrame: A DataFrame containing historical Kline data.
         """
-        data0 = self.exchange_client.get_klines(self.symbol, interval=self.interval, limit=1000, start_time=int((time.time() - 5000) * 1000))
-        data1 = self.exchange_client.get_klines(self.symbol, interval=self.interval, limit=1000, start_time=int((time.time() - 4000) * 1000))
-        data2 = self.exchange_client.get_klines(self.symbol, interval=self.interval, limit=1000, start_time=int((time.time() - 3000) * 1000))
-        data3 = self.exchange_client.get_klines(self.symbol, interval=self.interval, limit=1000, start_time=int((time.time() - 2000) * 1000))
+        data0 = self.exchange_client.get_klines(
+            self.symbol,
+            interval=self.interval,
+            limit=1000,
+            start_time=int((time.time() - 5000) * 1000),
+        )
+        data1 = self.exchange_client.get_klines(
+            self.symbol,
+            interval=self.interval,
+            limit=1000,
+            start_time=int((time.time() - 4000) * 1000),
+        )
+        data2 = self.exchange_client.get_klines(
+            self.symbol,
+            interval=self.interval,
+            limit=1000,
+            start_time=int((time.time() - 3000) * 1000),
+        )
+        data3 = self.exchange_client.get_klines(
+            self.symbol,
+            interval=self.interval,
+            limit=1000,
+            start_time=int((time.time() - 2000) * 1000),
+        )
         data4 = self.exchange_client.get_klines(self.symbol, self.interval, limit=1000)
 
         data = data0 + data1 + data2 + data3 + data4
@@ -57,7 +87,6 @@ class Backtester:
         df = pd.DataFrame(data)
         df.rename(columns={"open_time": "timestamp"}, inplace=True)
         return df
-
 
     def strategy_loop(self, dataset: pd.DataFrame) -> None:
         """
@@ -71,18 +100,23 @@ class Backtester:
             dataset (pd.DataFrame): The historical market data to be used for backtesting.
         """
         last_action = "SELL"
-        for i in range(dataset.shape[0]-self.strategy_chunk):
-            strategy_dataset = dataset[i:i+self.strategy_chunk]
+        for i in range(dataset.shape[0] - self.strategy_chunk):
+            strategy_dataset = dataset[i : i + self.strategy_chunk]
             signals = self.strategy.generate_signals(strategy_dataset.copy())
             action = signals.iloc[-1]["signal"]
             if action in ["BUY", "SELL"]:
                 if last_action == action:
                     action = f"INVALID_{action}"
                 last_action = signals.iloc[-1]["signal"]
-            self.backtesting_logs.append({"timestamp": int(signals.iloc[-1]["timestamp"]), "price": float(signals.iloc[-1]["close_price"]), "order": action})
+            self.backtesting_logs.append(
+                {
+                    "timestamp": int(signals.iloc[-1]["timestamp"]),
+                    "price": float(signals.iloc[-1]["close_price"]),
+                    "order": action,
+                }
+            )
 
-
-    def run_backtest(self) -> Optional[Tuple[List[Dict[str, Any]], float]]:
+    def run_backtest(self) -> tuple[list[dict[str, Any]], float] | None:
         """
         Executes the full backtesting process.
 

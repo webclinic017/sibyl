@@ -1,9 +1,8 @@
-from streamlit import markdown, fragment, button
+from streamlit import button, fragment, markdown
 
 
 @fragment()
 def oracle_button(module: str, enabled: bool = True, content: dict = None):
-
     button_style = """
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>

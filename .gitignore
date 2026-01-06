@@ -15,3 +15,7 @@
 /assets/architecture.excalidraw
 /llm_gateway/llm_models/llama_cpp/models/*
 /frontend/db/frontend.db
+*.pyc
+*.pyo
+*.pyd
+.DS_Store

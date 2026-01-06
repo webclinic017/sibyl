@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any, List, Union
+from typing import Any
 
 
 class ExchangeAPIClient(ABC):
-
     def __init__(self):
         self.name: str = ""
         self.api_key: str = ""
@@ -24,7 +23,18 @@ class ExchangeAPIClient(ABC):
         pass
 
     @abstractmethod
-    def place_spot_order(self, order_type: str, quote_asset: str, base_asset: str, side: str, quantity: float, price: Optional[float] = None, stop_price: Optional[float] = None, take_profit_price: Optional[float] = None, time_in_force: Optional[str] = None) -> Dict[str, Any]:
+    def place_spot_order(
+        self,
+        order_type: str,
+        quote_asset: str,
+        base_asset: str,
+        side: str,
+        quantity: float,
+        price: float | None = None,
+        stop_price: float | None = None,
+        take_profit_price: float | None = None,
+        time_in_force: str | None = None,
+    ) -> dict[str, Any]:
         """
         Places an order on Exchange based on the given parameters.
 
@@ -47,9 +57,19 @@ class ExchangeAPIClient(ABC):
 
         pass
 
-
     @abstractmethod
-    def place_spot_test_order(self, order_type: str, quote_asset: str, base_asset: str, side: str, quantity: float, price: Optional[float] = None, stop_price: Optional[float] = None, take_profit_price: Optional[float] = None, time_in_force: Optional[str] = None) -> Dict[str, str]:
+    def place_spot_test_order(
+        self,
+        order_type: str,
+        quote_asset: str,
+        base_asset: str,
+        side: str,
+        quantity: float,
+        price: float | None = None,
+        stop_price: float | None = None,
+        take_profit_price: float | None = None,
+        time_in_force: str | None = None,
+    ) -> dict[str, str]:
         """
         Same as place_spot_order but to test if the trade is possible.
 
@@ -60,15 +80,14 @@ class ExchangeAPIClient(ABC):
         """
         pass
 
-
     @abstractmethod
-    def get_account_information(self) -> Dict[str, Any]:
+    def get_account_information(self) -> dict[str, Any]:
         """
-        Fetches the account information from the exchange, including the commission rates 
-        (maker, taker, buyer, and seller) and the account's ability to perform trading, 
-        depositing, and withdrawing operations. 
+        Fetches the account information from the exchange, including the commission rates
+        (maker, taker, buyer, and seller) and the account's ability to perform trading,
+        depositing, and withdrawing operations.
 
-        The function is designed to work with various exchanges, and it returns a dictionary 
+        The function is designed to work with various exchanges, and it returns a dictionary
         with the relevant data or an error message in case of failure.
 
         **Response Dictionary:**
@@ -90,7 +109,7 @@ class ExchangeAPIClient(ABC):
         pass
 
     @abstractmethod
-    def get_spot_balance(self, quote_asset_pair_price: str = None) -> Dict[str, Any]:
+    def get_spot_balance(self, quote_asset_pair_price: str = None) -> dict[str, Any]:
         """
         Retrieve the user's spot balance, including free and locked amounts, along with current prices.
 
@@ -103,7 +122,7 @@ class ExchangeAPIClient(ABC):
         pass
 
     @abstractmethod
-    def get_available_assets(self, quote_asset: str = "all") -> Optional[Dict[str, List[str]]]:
+    def get_available_assets(self, quote_asset: str = "all") -> dict[str, list[str]] | None:
         """
         Fetches available trading pairs from Exchange and groups them by quote asset.
 
@@ -124,7 +143,14 @@ class ExchangeAPIClient(ABC):
         pass
 
     @abstractmethod
-    def get_klines(self, symbol: str, interval: str, limit: int, start_time: int = None, end_time: int = None) -> Optional[List[Dict[str, float]]]:
+    def get_klines(
+        self,
+        symbol: str,
+        interval: str,
+        limit: int,
+        start_time: int = None,
+        end_time: int = None,
+    ) -> list[dict[str, float]] | None:
         """
         Fetches historical OHLCV data for a given symbol from the client.
 
@@ -141,9 +167,8 @@ class ExchangeAPIClient(ABC):
         """
         pass
 
-
     @abstractmethod
-    def get_symbol_info(self, symbol: str) -> Dict[str, Any] | None:
+    def get_symbol_info(self, symbol: str) -> dict[str, Any] | None:
         """
         Retrieves information about a specific symbol pair.
 
@@ -155,9 +180,8 @@ class ExchangeAPIClient(ABC):
         """
         pass
 
-
     @abstractmethod
-    def get_minimum_trade_value(self, symbol: str) -> Optional[Dict[str, Union[float, str]]]:
+    def get_minimum_trade_value(self, symbol: str) -> dict[str, float | str] | None:
         """
         Retrieves the minimum trade value required for a given trading pair.
 
@@ -176,7 +200,6 @@ class ExchangeAPIClient(ABC):
         """
         pass
 
-
     @abstractmethod
     def get_pair_market_price(self, pair_symbol: str) -> float | None:
         """
@@ -186,7 +209,6 @@ class ExchangeAPIClient(ABC):
         :return: Current price of the asset in the specified quote currency
         """
         pass
-
 
     @abstractmethod
     def add_spot_order_to_trade_history_db(self, quote_asset: str, base_asset: str, trade_dict: dict) -> bool:
@@ -202,7 +224,7 @@ class ExchangeAPIClient(ABC):
         pass
 
     @abstractmethod
-    def get_orderbook(self, quote_asset: str, base_asset: str, limit: int) ->Optional[List[List[Dict[str, float]]]]:
+    def get_orderbook(self, quote_asset: str, base_asset: str, limit: int) -> list[list[dict[str, float]]] | None:
         """
         Fetches the order book for a given trading pair from Exchange API and formats the data.
 

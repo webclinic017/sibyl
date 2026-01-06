@@ -1,6 +1,6 @@
 import json
 
-STOCKS_PATH = 'frontend/db/stocks.json'
+STOCKS_PATH = "frontend/db/stocks.json"
 
 
 def get_stocks_list():
@@ -13,7 +13,7 @@ def get_stocks_list():
         list: A list of strings formatted as "Name [Symbol]".
     """
     # Read the JSON file
-    with open(STOCKS_PATH, "r") as f:
+    with open(STOCKS_PATH) as f:
         stock_list = json.load(f)
 
     # Convert the dictionary to a list of strings

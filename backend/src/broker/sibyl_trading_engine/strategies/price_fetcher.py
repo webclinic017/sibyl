@@ -1,11 +1,18 @@
 import time
-from threading import Thread, Lock
-import pandas as pd
+from threading import Lock, Thread
 from typing import Any
+
+import pandas as pd
 
 
 class PriceFetcher:
-    def __init__(self, exchange: Any, symbol: str, update_interval: int = 60, data: pd.DataFrame = None):
+    def __init__(
+        self,
+        exchange: Any,
+        symbol: str,
+        update_interval: int = 60,
+        data: pd.DataFrame = None,
+    ):
         """
         Fetch the latest price from the exchange at regular intervals.
         Args:
@@ -22,14 +29,12 @@ class PriceFetcher:
         self.lock = Lock()
         self.thread = None
 
-
     def fetch_price(self) -> float:
         """
         Fetch the current price for the given symbol.
         """
         price = self.exchange.get_symbol_price(self.symbol)  # Simulate fetching price from exchange
         return price
-
 
     def update_price(self):
         """
@@ -40,11 +45,12 @@ class PriceFetcher:
             price = self.fetch_price()
             timestamp = pd.Timestamp.now().floor("s")
             new_data = pd.DataFrame({"timestamp": [timestamp], "close": [price]})
-            self.data = pd.concat([self.data[1:], new_data], ignore_index=True) # remove first, append new
-            print(f"PriceFetcher :: fetched data | t: {new_data["timestamp"].iloc[0].strftime("%H:%M:%S")}, p: {new_data['close'].iloc[0]:.2f}")
+            self.data = pd.concat([self.data[1:], new_data], ignore_index=True)  # remove first, append new
+            print(
+                f"PriceFetcher :: fetched data | t: {new_data['timestamp'].iloc[0].strftime('%H:%M:%S')}, p: {new_data['close'].iloc[0]:.2f}"
+            )
             # print(self.data[0:1]["timestamp"], self.data[-2:-1]["timestamp"])
             time.sleep(self.update_interval)
-
 
     def start(self):
         """
@@ -53,8 +59,7 @@ class PriceFetcher:
         self.running = True
         self.thread = Thread(target=self.update_price, daemon=True)
         self.thread.start()
-        print(f"PriceFetcher :: thread started")
-
+        print("PriceFetcher :: thread started")
 
     def stop(self):
         """
@@ -63,7 +68,7 @@ class PriceFetcher:
         self.running = False
         if self.thread:
             self.thread.join()
-        print(f"PriceFetcher :: thread stopped")
+        print("PriceFetcher :: thread stopped")
 
     def get_data(self):
         return self.data.copy()

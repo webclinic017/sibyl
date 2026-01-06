@@ -1,9 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from backend.src.technician.technician import Technician
-from typing import Optional
-from backend.src.exchange_client.exchange_client_factory import ExchangeClientFactory
 
+from backend.src.exchange_client.exchange_client_factory import ExchangeClientFactory
+from backend.src.technician.technician import Technician
 
 # APIRouter creates path operations for user module
 router = APIRouter(
@@ -19,7 +18,7 @@ technician_worker = Technician()
 def get_api_status(api_name: str):
     try:
         res = technician_worker.api_status_check(api_name)
-    except Exception as e: # TODO Handle exception at client level
+    except Exception as e:  # TODO Handle exception at client level
         print(f"TECHNICIAN :: status/api/all :: {e}")
         res = {}
     return res
@@ -28,16 +27,22 @@ def get_api_status(api_name: str):
 class APIParams(BaseModel):
     api_name: str
     api_key: str
-    secret_key: Optional[str] = None
-    api_metadata: Optional[str] = None
+    secret_key: str | None = None
+    api_metadata: str | None = None
+
 
 @router.post("/credentials/apis/add")
 def insert_update_api_keys(api_params: APIParams):
     try:
         # check if exists (insert or update)
-        res = technician_worker.insert_api_key_to_db(api_params.api_name, api_params.api_key, api_params.secret_key, api_params.api_metadata)
+        res = technician_worker.insert_api_key_to_db(
+            api_params.api_name,
+            api_params.api_key,
+            api_params.secret_key,
+            api_params.api_metadata,
+        )
         if res:
-            return {'status': 'success'}
+            return {"status": "success"}
         else:
             raise HTTPException(status_code=400, detail="Failed to insert API key.")
     except Exception as e:
@@ -45,9 +50,9 @@ def insert_update_api_keys(api_params: APIParams):
         raise HTTPException(status_code=400, detail="Failed to insert API key.")
 
 
-
 class StatusRequest(BaseModel):
     status: bool
+
 
 @router.put("/exchanges/mock/status")
 def set_mock_exchange_status(req: StatusRequest):
@@ -66,7 +71,6 @@ def set_mock_exchange_status(req: StatusRequest):
     except Exception as e:
         print(f"TECHNICIAN ERROR :: {e}")
         raise HTTPException(status_code=500, detail="Failed to update mock exchange status.")
-
 
 
 @router.get("/status/local/models")

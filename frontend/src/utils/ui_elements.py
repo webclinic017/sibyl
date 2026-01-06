@@ -1,23 +1,28 @@
-from streamlit import set_page_config, html, cache_resource, logo, markdown, button, fragment
-from PIL import Image
+from streamlit import html, logo, set_page_config
 
 
-def fix_page_layout(page_name: str, padding_top: str = '2.1rem'):
-
+def fix_page_layout(page_name: str, padding_top: str = "2.1rem"):
     # im = Image.open("frontend/static/favicon/favicon-32x32.png")
     set_page_config(
         page_title=page_name,
         page_icon="frontend/static/favicon/favicon.ico",
         layout="wide",
     )
-    logo("assets/logo_transparent.png", icon_image="assets/logo_brand.png",)
-    html("""
+    logo(
+        "assets/logo_transparent.png",
+        icon_image="assets/logo_brand.png",
+    )
+    html(
+        """
             <style>
                    .block-container {
-                        padding-top: """ + padding_top + """;
+                        padding-top: """
+        + padding_top
+        + """;
                     }
             </style>
-            """)
+            """
+    )
     # FOOTER
     # html("""<style>
     # footer { visibility: hidden;}

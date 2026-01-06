@@ -1,17 +1,18 @@
+import os
+import random
+import re
+
+from dotenv import load_dotenv
+from langchain.agents import AgentExecutor, AgentType, ZeroShotAgent, initialize_agent
+from langchain.agents.output_parsers import ReActSingleInputOutputParser
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+
+from llm_gateway.agents.agent_base import AgentBase
+from llm_gateway.llm_models.llm_base import LLMBase
+from llm_gateway.tools.conversation import ConversationalTool
 from llm_gateway.tools.rag_retriever import DocumentRetrieverTool
 from llm_gateway.tools.web_search import WebSearchTool
-from llm_gateway.tools.conversation import ConversationalTool
-from langchain.agents import Tool, initialize_agent, AgentExecutor, AgentType, ZeroShotAgent
-from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-import os
-from dotenv import load_dotenv
-import random
-from llm_gateway.llm_models.llm_base import LLMBase
-from llm_gateway.agents.agent_base import AgentBase
-import re
-from langchain.agents.output_parsers import ReActSingleInputOutputParser
 
 
 class WikiReactiveAgent(AgentBase):
@@ -22,7 +23,6 @@ class WikiReactiveAgent(AgentBase):
     """
 
     def __init__(self, llm_model: LLMBase):
-
         super().__init__(llm_model)
 
         # ========================
@@ -31,11 +31,14 @@ class WikiReactiveAgent(AgentBase):
         web_search = WebSearchTool(max_results=5)
         web_search_tool = web_search.as_langchain_tool()
 
-        load_dotenv('database/db_paths.env')
+        load_dotenv("database/db_paths.env")
         self.vectorstore_path = os.getenv("WIKI_VECTORSTORE_PATH")
         doc_retriever = DocumentRetrieverTool(
             persist_directory=self.vectorstore_path,
-            collection_name="crypto_knowledge", threshold=0.5, k=5)
+            collection_name="crypto_knowledge",
+            threshold=0.5,
+            k=5,
+        )
         doc_retriever_tool = doc_retriever.as_langchain_tool()
 
         conversation_tool = ConversationalTool().as_langchain_tool()
@@ -81,9 +84,8 @@ class WikiReactiveAgent(AgentBase):
             llm=self.llm,
             memory=self.memory,
             verbose=False,
-            handle_parsing_errors=True
+            handle_parsing_errors=True,
         )
-
 
     def zeroshot_agent(self):
         """
@@ -168,12 +170,11 @@ class WikiReactiveAgent(AgentBase):
         {agent_scratchpad}
         """
 
-
         prompt = ZeroShotAgent.create_prompt(
             self.tools,
             prefix="You are a helpful agent.",
             suffix="{input}\n\n{agent_scratchpad}",
-            input_variables=["input", "agent_scratchpad"]
+            input_variables=["input", "agent_scratchpad"],
         )
 
         # Construct the agent manually
@@ -191,13 +192,11 @@ class WikiReactiveAgent(AgentBase):
             tools=self.tools,
             verbose=True,
             handle_parsing_errors=True,
-            memory=None, # Stateless Run
+            memory=None,  # Stateless Run
         )
-
 
     def set_llm(self):
         pass
-
 
     def classify_query(self, query: str) -> str:
         """
@@ -229,7 +228,6 @@ class WikiReactiveAgent(AgentBase):
         else:
             return "Technical"
 
-
     def manual_wiki_pipeline(self, query: str) -> str:
         """
         Fallback function where the Agent logic is being run manually.
@@ -251,13 +249,18 @@ class WikiReactiveAgent(AgentBase):
                 "Hey there! Ready to explore the crypto world?",
                 "Welcome! Curious about crypto? Ask me anything.",
                 "Hello! Let's decode the world of crypto together.",
-                "Hey! Looking for some insights into Web3 or crypto?"
+                "Hey! Looking for some insights into Web3 or crypto?",
             ]
             random_greeting = random.choice(greetings)
             return f"Answer: {random_greeting}"
 
         # If technical, search the database for relevant documents
-        doc_retriever = DocumentRetrieverTool(persist_directory=self.vectorstore_path, collection_name="crypto_knowledge", threshold=0.5, k=5)
+        doc_retriever = DocumentRetrieverTool(
+            persist_directory=self.vectorstore_path,
+            collection_name="crypto_knowledge",
+            threshold=0.5,
+            k=5,
+        )
         documents = doc_retriever.retrieve(query)
         print("<<Wiki Agent>> - Documents Retrieved", len(documents))
         # IF RAG
@@ -312,9 +315,7 @@ class WikiReactiveAgent(AgentBase):
             response = self.llm(prompt)
             return response
 
-
     def run(self, query: str) -> str:
-
         # ========================
         # AGENT EXECUTION LOGIC
         # ========================
@@ -338,6 +339,3 @@ class WikiReactiveAgent(AgentBase):
         # except Exception as e:
         #     print(f"Agent execution failed: {e}")
         #     return "Sorryyyyyyyyyyyyy" # self.manual_wiki_pipeline(query)
-
-
-

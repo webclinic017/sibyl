@@ -1,9 +1,7 @@
-from llm_gateway.rag.document_parser import DocumentParser
 from llm_gateway.rag.chromadb_client import ChromaDBClient
+from llm_gateway.rag.document_parser import DocumentParser
 
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     client = ChromaDBClient()
     document_parser = DocumentParser()
 

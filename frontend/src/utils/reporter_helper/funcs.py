@@ -1,14 +1,32 @@
-from frontend.src.utils.reporter_helper.client import fetch_news, fetch_news_summary, fetch_news_sentiment,get_chatbot_response
-from streamlit import write, warning, expander, markdown, image, plotly_chart, caption, code, html, error as st_error, dialog
-import json
-from requests import get as requests_get
-from plotly.graph_objects import Figure, Bar, Indicator
-import plotly.graph_objects as go
 from datetime import datetime
+
+import plotly.graph_objects as go
+from plotly.graph_objects import Bar, Figure, Indicator
+from requests import get as requests_get
+from streamlit import (
+    caption,
+    dialog,
+    expander,
+    html,
+    markdown,
+    plotly_chart,
+    warning,
+    write,
+)
+from streamlit import (
+    error as st_error,
+)
+
+from frontend.src.utils.reporter_helper.client import (
+    fetch_news,
+    fetch_news_sentiment,
+    fetch_news_summary,
+    get_chatbot_response,
+)
 
 
 def get_fear_and_greed_index_gauge_plot():
-    with expander('What is the **Fear & Greed Index**?', expanded=True):
+    with expander("What is the **Fear & Greed Index**?", expanded=True):
         markdown("""The crypto market behaviour is very emotional. People tend to get greedy when the market is rising 
         which results in FOMO (Fear of missing out). Also, people often sell their coins in irrational reaction of seeing 
         red numbers. With our Fear and Greed Index, we try to save you from your own emotional overreactions. There are two 
@@ -16,43 +34,49 @@ def get_fear_and_greed_index_gauge_plot():
         When Investors are getting too greedy, that means the market is due for a correction. Therefore, we analyze the current 
         sentiment of the Bitcoin market and crunch the numbers into a simple meter from 0 to 100. Zero means "Extreme Fear", 
         while 100 means "Extreme Greed". See below for further information on our data sources.""")
-        caption('Source: alternative.me')
+        caption("Source: alternative.me")
 
     res = requests_get("https://api.alternative.me/fng/?limit=60")
     if res.status_code == 200:
         fg_indexes = []
         colors = []
-        fg_status = 'Neutral'
-        for v in res.json()['data']:
-
-            fg_indexes.append([datetime.fromtimestamp(int(v['timestamp'])), v['value']])
-            fg_index = int(v['value'])
+        fg_status = "Neutral"
+        for v in res.json()["data"]:
+            fg_indexes.append([datetime.fromtimestamp(int(v["timestamp"])), v["value"]])
+            fg_index = int(v["value"])
             if fg_index <= 20:
-                colors.append('#ed0022')
+                colors.append("#ed0022")
                 fg_status = "Extreme fear"
             elif 20 < fg_index <= 45:
-                colors.append('#ffad00')
+                colors.append("#ffad00")
                 fg_status = "Fear"
             elif 45 < fg_index <= 55:
-                colors.append('#c6bf22')
-                fg_status = 'Neutral'
+                colors.append("#c6bf22")
+                fg_status = "Neutral"
             elif 55 < fg_index <= 80:
-                colors.append('#92b73a')
+                colors.append("#92b73a")
                 fg_status = "Greed"
             else:  # > 80
-                colors.append('#009a60')
+                colors.append("#009a60")
                 fg_status = "High Greed"
 
-        fig = Figure(data=[Bar(
-            x=[x[0] for x in fg_indexes],
-            y=[x[1] for x in fg_indexes],
-            marker_color=colors  # marker color can be a single color value or an iterable
-        )])
+        fig = Figure(
+            data=[
+                Bar(
+                    x=[x[0] for x in fg_indexes],
+                    y=[x[1] for x in fg_indexes],
+                    marker_color=colors,  # marker color can be a single color value or an iterable
+                )
+            ]
+        )
         fig.update_yaxes(range=[0, 100])
-        fig.update_layout(title_text='Fear & Greed index the past Month.\nCurrent: ' + fg_status)
+        fig.update_layout(title_text="Fear & Greed index the past Month.\nCurrent: " + fg_status)
         plotly_chart(fig, use_container_width=True)
     else:
-        st_error("Failed to fetch data from **alternative API**, check your **internet connection**.", icon=":material/error:")
+        st_error(
+            "Failed to fetch data from **alternative API**, check your **internet connection**.",
+            icon=":material/error:",
+        )
 
     # direct Image
     # image(image="https://alternative.me/crypto/fear-and-greed-index.png", caption="Fear & Greed Index (fetched from alternative.me)", )
@@ -73,8 +97,7 @@ def get_fear_and_greed_index_gauge_plot():
 
 
 # @cache_data(ttl=3600)  #  cache result for 1 hour
-def get_latest_news(website: str = 'cointelegraph', limit: int = 10):
-
+def get_latest_news(website: str = "cointelegraph", limit: int = 10):
     articles = fetch_news(website, limit)
     if len(list(articles)) > 0:
         # c = 1
@@ -159,7 +182,7 @@ def get_latest_news(website: str = 'cointelegraph', limit: int = 10):
           <h3 class="center">Cointelegraph Top 10 News</h3>
         """)
 
-        articles = fetch_news('cointelegraph', 10)
+        articles = fetch_news("cointelegraph", 10)
         c = 1
         for article in articles:
             article_title = article[0]
@@ -168,7 +191,7 @@ def get_latest_news(website: str = 'cointelegraph', limit: int = 10):
             article_body = article[3]
             article_p = article_body  # "\n".join(article_body)
 
-            ep_num = '0' + str(c) if c < 10 else str(c)
+            ep_num = "0" + str(c) if c < 10 else str(c)
             html(f"""
                   <article class="episode">
                     <div class="episode__number">{ep_num}</div>
@@ -186,36 +209,47 @@ def get_latest_news(website: str = 'cointelegraph', limit: int = 10):
             c += 1
         html("""</div><h4 class="episode_center"><a href="" target="_blank" rel="">News from Cointelegraph</a></h4>""")
     else:
-        warning('No Articles Found! Connection to Cointelegraph Website might be lost.')
+        warning("No Articles Found! Connection to Cointelegraph Website might be lost.")
 
 
-def get_news_summary(model: str, website: str = 'cointelegraph'):
+def get_news_summary(model: str, website: str = "cointelegraph"):
     summary = fetch_news_summary(model, website)
     html(f"""<p>{summary}</p>""")
 
 
-def get_news_sentiment(model: str = 'vader', website: str = 'cointelegraph'):
+def get_news_sentiment(model: str = "vader", website: str = "cointelegraph"):
     sentiment_score = fetch_news_sentiment()
     if sentiment_score:
         # # GAUGE PLOT
-        fig = Figure(Indicator(
-            domain={'x': [0, 1], 'y': [0, 1]},
-            value=sentiment_score,
-            mode="gauge+number",
-            title={'text': "Sentiment Score"},
-            gauge={'axis': {'range': [-1, 1], 'tickcolor': "#41424C"},'bar': {'color': "#41424C"},
-                   'steps': [
-                       {'range': [-1, -0.8], 'color': '#ed0022'},
-                       {'range': [-0.8, -0.6], 'color': '#f43021'},
-                       {'range': [-0.6, -0.4], 'color': '#fc6114'},
-                       {'range': [-0.4, -0.2], 'color': '#ff8c00'},
-                       {'range': [-0.2, 0], 'color': '#ffad00'},
-                       {'range': [0, 0.2], 'color': '#edbd02'},
-                       {'range': [0.2, 0.4], 'color': '#c6bf22'},
-                       {'range': [0.4, 0.6], 'color': '#92b73a'},
-                       {'range': [0.6, 0.8], 'color': '#4aa84e'},
-                       {'range': [0.8, 1], 'color': '#009a60'}],
-            'threshold': {'line': {'color': "#41424C", 'width': 4}, 'thickness': 1, 'value': sentiment_score}}))
+        fig = Figure(
+            Indicator(
+                domain={"x": [0, 1], "y": [0, 1]},
+                value=sentiment_score,
+                mode="gauge+number",
+                title={"text": "Sentiment Score"},
+                gauge={
+                    "axis": {"range": [-1, 1], "tickcolor": "#41424C"},
+                    "bar": {"color": "#41424C"},
+                    "steps": [
+                        {"range": [-1, -0.8], "color": "#ed0022"},
+                        {"range": [-0.8, -0.6], "color": "#f43021"},
+                        {"range": [-0.6, -0.4], "color": "#fc6114"},
+                        {"range": [-0.4, -0.2], "color": "#ff8c00"},
+                        {"range": [-0.2, 0], "color": "#ffad00"},
+                        {"range": [0, 0.2], "color": "#edbd02"},
+                        {"range": [0.2, 0.4], "color": "#c6bf22"},
+                        {"range": [0.4, 0.6], "color": "#92b73a"},
+                        {"range": [0.6, 0.8], "color": "#4aa84e"},
+                        {"range": [0.8, 1], "color": "#009a60"},
+                    ],
+                    "threshold": {
+                        "line": {"color": "#41424C", "width": 4},
+                        "thickness": 1,
+                        "value": sentiment_score,
+                    },
+                },
+            )
+        )
 
         fig.update_layout(margin=go.layout.Margin(t=0, b=0), height=200, showlegend=False)
         # fig.update(config=dict(displayModeBar=False))
@@ -225,11 +259,11 @@ def get_news_sentiment(model: str = 'vader', website: str = 'cointelegraph'):
     return 1
 
 
-from streamlit import session_state, chat_message, chat_input
+from streamlit import chat_input, chat_message, session_state
+
 
 @dialog("💬 Oracle News Chatbot", width="large")
 def oracle_news_chatbot():
-
     if "news_chatbot_messages" not in session_state:
         session_state["news_chatbot_messages"] = []
 
@@ -244,6 +278,11 @@ def oracle_news_chatbot():
             markdown(user_input)
 
         with chat_message("assistant"):
-            bot_response = get_chatbot_response(model_source="local", model_type="llama_cpp", model_name=None, question=user_input)  # TODO read LLM info from DB
+            bot_response = get_chatbot_response(
+                model_source="local",
+                model_type="llama_cpp",
+                model_name=None,
+                question=user_input,
+            )  # TODO read LLM info from DB
             markdown(bot_response)
         session_state.news_chatbot_messages.append({"role": "assistant", "content": bot_response})

@@ -1,6 +1,9 @@
-from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import BaseStrategy
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import (
+    BaseStrategy,
+)
 
 
 class BollingerSurgeStrategy(BaseStrategy):
@@ -12,9 +15,15 @@ class BollingerSurgeStrategy(BaseStrategy):
     Sells when price is near the upper Bollinger Band, RSI is overbought, and EMA signals a downward trend.
     """
 
-    def __init__(self, bb_window: int = 20, bb_std_dev: float = 2.0,
-                 rsi_window: int = 14, ema_short: int = 9, ema_long: int = 21,
-                 volume_factor: float = 1.5) -> None:
+    def __init__(
+        self,
+        bb_window: int = 20,
+        bb_std_dev: float = 2.0,
+        rsi_window: int = 14,
+        ema_short: int = 9,
+        ema_long: int = 21,
+        volume_factor: float = 1.5,
+    ) -> None:
         """
         Initializes the strategy.
 
@@ -36,7 +45,6 @@ class BollingerSurgeStrategy(BaseStrategy):
 
         self.name = "Bollinger Surge Strategy"
         self.is_price_only = False
-
 
     def calculate_indicators(self, data: pd.DataFrame) -> None:
         """
@@ -75,22 +83,32 @@ class BollingerSurgeStrategy(BaseStrategy):
 
         # Buy Conditions
         buy_condition = (
-            (self.data["close_price"] < self.data["lower_band"]) &  # Price near lower BB
-            (self.data["RSI"] < 30) &  # RSI oversold
-            (self.data["EMA_Short"] > self.data["EMA_Long"]) &  # Uptrend EMA crossover
-            (self.data["Volume_Spike"])  # High volume confirmation
+            (self.data["close_price"] < self.data["lower_band"])  # Price near lower BB
+            & (self.data["RSI"] < 30)  # RSI oversold
+            & (self.data["EMA_Short"] > self.data["EMA_Long"])  # Uptrend EMA crossover
+            & (self.data["Volume_Spike"])  # High volume confirmation
         )
 
         # Sell Conditions
         sell_condition = (
-            (self.data["close_price"] > self.data["upper_band"]) &  # Price near upper BB
-            (self.data["RSI"] > 70) &  # RSI overbought
-            (self.data["EMA_Short"] < self.data["EMA_Long"]) &  # Downtrend EMA crossover
-            (self.data["Volume_Spike"])  # High volume confirmation
+            (self.data["close_price"] > self.data["upper_band"])  # Price near upper BB
+            & (self.data["RSI"] > 70)  # RSI overbought
+            & (self.data["EMA_Short"] < self.data["EMA_Long"])  # Downtrend EMA crossover
+            & (self.data["Volume_Spike"])  # High volume confirmation
         )
 
-        self.data["signal"] = np.where(buy_condition, "BUY",
-                                       np.where(sell_condition, "SELL", "HOLD"))
+        self.data["signal"] = np.where(buy_condition, "BUY", np.where(sell_condition, "SELL", "HOLD"))
 
-        return self.data[["timestamp", "close_price", "upper_band", "lower_band", "RSI",
-                          "EMA_Short", "EMA_Long", "Volume_Spike", "signal"]]
+        return self.data[
+            [
+                "timestamp",
+                "close_price",
+                "upper_band",
+                "lower_band",
+                "RSI",
+                "EMA_Short",
+                "EMA_Long",
+                "Volume_Spike",
+                "signal",
+            ]
+        ]

@@ -1,9 +1,14 @@
-import streamlit as st
 import time
-import plotly.graph_objs as go
+
 import numpy as np
 import pandas as pd
-from frontend.src.utils.strategy_helper.client import get_strategy_logs, get_strategy_evaluation
+import plotly.graph_objs as go
+import streamlit as st
+
+from frontend.src.utils.strategy_helper.client import (
+    get_strategy_evaluation,
+    get_strategy_logs,
+)
 
 
 # Function to generate a random initial DataFrame
@@ -13,22 +18,31 @@ def generate_random_df(size=50):
     orders = np.random.choice(["BUY", "SELL", "HOLD"], size=size)
     return pd.DataFrame({"timestamp": timestamps, "price": prices, "order": orders})
 
-def update_logs(strategy_id: str, last_timestamp: int):
 
+def update_logs(strategy_id: str, last_timestamp: int):
     logs = get_strategy_logs(strategy_id, last_timestamp)  # df_to_show["strategy_id"].iloc[0])
     if logs is None or len(logs) == 0:
         return None
 
     logs_df = pd.DataFrame(logs)
-    logs_df['timestamp'] = pd.to_datetime(logs_df['timestamp'], unit='ms')
+    logs_df["timestamp"] = pd.to_datetime(logs_df["timestamp"], unit="ms")
     return logs_df
 
 
 @st.fragment()
-def real_time_strategy_plot(df: pd.DataFrame, strategy_id: str, time_interval: str, show_invalid:bool):
-
-    time_interval_dict = {'1s': 5, '15s': 15, '1m': 60, '5m': 300, '15m': 900,
-                          '30m': 1800, '1h': 3600, '4h': 14400, '12h': 43200, '1d': 86400}
+def real_time_strategy_plot(df: pd.DataFrame, strategy_id: str, time_interval: str, show_invalid: bool):
+    time_interval_dict = {
+        "1s": 5,
+        "15s": 15,
+        "1m": 60,
+        "5m": 300,
+        "15m": 900,
+        "30m": 1800,
+        "1h": 3600,
+        "4h": 14400,
+        "12h": 43200,
+        "1d": 86400,
+    }
     time_interval = time_interval_dict[time_interval]
 
     # Create a placeholder for the Plotly chart
@@ -37,19 +51,51 @@ def real_time_strategy_plot(df: pd.DataFrame, strategy_id: str, time_interval: s
     fig = go.Figure()
 
     # Add initial traces
-    fig.add_trace(go.Scatter(x=df["timestamp"], y=df["price"], mode='lines', name='Price'))
-    fig.add_trace(go.Scatter(x=df[df["order"] == "BUY"]["timestamp"], y=df[df["order"] == "BUY"]["price"], mode='markers', marker=dict(color='green', size=12, symbol='triangle-up'), name='BUY'))
-    fig.add_trace(go.Scatter(x=df[df["order"] == "SELL"]["timestamp"], y=df[df["order"] == "SELL"]["price"], mode='markers', marker=dict(color='red', size=12, symbol='triangle-down'), name='SELL'))
+    fig.add_trace(go.Scatter(x=df["timestamp"], y=df["price"], mode="lines", name="Price"))
+    fig.add_trace(
+        go.Scatter(
+            x=df[df["order"] == "BUY"]["timestamp"],
+            y=df[df["order"] == "BUY"]["price"],
+            mode="markers",
+            marker=dict(color="green", size=12, symbol="triangle-up"),
+            name="BUY",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=df[df["order"] == "SELL"]["timestamp"],
+            y=df[df["order"] == "SELL"]["price"],
+            mode="markers",
+            marker=dict(color="red", size=12, symbol="triangle-down"),
+            name="SELL",
+        )
+    )
     if show_invalid:
-        fig.add_trace(go.Scatter(x=df[df["order"] == "INVALID_BUY"]["timestamp"], y=df[df["order"] == "INVALID_BUY"]["price"], mode='markers', marker=dict(color='green', size=10, symbol='triangle-up-open'), name='Invalid BUY'))
-        fig.add_trace(go.Scatter(x=df[df["order"] == "INVALID_SELL"]["timestamp"], y=df[df["order"] == "INVALID_SELL"]["price"], mode='markers', marker=dict(color='red', size=10, symbol='triangle-down-open'), name='Invalid SELL'))
+        fig.add_trace(
+            go.Scatter(
+                x=df[df["order"] == "INVALID_BUY"]["timestamp"],
+                y=df[df["order"] == "INVALID_BUY"]["price"],
+                mode="markers",
+                marker=dict(color="green", size=10, symbol="triangle-up-open"),
+                name="Invalid BUY",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=df[df["order"] == "INVALID_SELL"]["timestamp"],
+                y=df[df["order"] == "INVALID_SELL"]["price"],
+                mode="markers",
+                marker=dict(color="red", size=10, symbol="triangle-down-open"),
+                name="Invalid SELL",
+            )
+        )
 
     # Display the empty chart
-    chart.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    chart.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     # Real-time update loop
     while True:
-        upd_logs = update_logs(strategy_id, int(df['timestamp'].iloc[-1].timestamp() * 1000))
+        upd_logs = update_logs(strategy_id, int(df["timestamp"].iloc[-1].timestamp() * 1000))
         if upd_logs is not None:
             df = pd.concat([df, upd_logs])
             with fig.batch_update():
@@ -73,14 +119,13 @@ def real_time_strategy_plot(df: pd.DataFrame, strategy_id: str, time_interval: s
                     fig.data[4].x = df[df["order"] == "INVALID_SELL"]["timestamp"]
                     fig.data[4].y = df[df["order"] == "INVALID_SELL"]["price"]
 
-            chart.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-
+            chart.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
         progress_text = "Updating logs..."
         my_bar = st.progress(0, text=progress_text)
         for percent_complete in range(50):
-            time.sleep(time_interval/50)
-            my_bar.progress(percent_complete/50, text=progress_text)
+            time.sleep(time_interval / 50)
+            my_bar.progress(percent_complete / 50, text=progress_text)
         # time.sleep(1)
         my_bar.empty()
 
@@ -89,31 +134,35 @@ def real_time_strategy_plot(df: pd.DataFrame, strategy_id: str, time_interval: s
 
 # Static plotting function
 def static_strategy_plot(df: pd.DataFrame, show_invalid: bool, show_slippage: bool):
-
     fig = go.Figure()
     # Plot price line
-    fig.add_trace(go.Scatter(x=df["timestamp"], y=df["price"], mode='lines', name='Price'))
+    fig.add_trace(go.Scatter(x=df["timestamp"], y=df["price"], mode="lines", name="Price"))
 
     # Plot BUY markers
     buy_df = df[df["order"] == "BUY"]
-    fig.add_trace(go.Scatter(
-        x=buy_df["timestamp"],
-        y=buy_df["price"],
-        mode='markers',
-        marker=dict(color='green', size=13, symbol='triangle-up'),
-        name='BUY'
-    ))
-
+    fig.add_trace(
+        go.Scatter(
+            x=buy_df["timestamp"],
+            y=buy_df["price"],
+            mode="markers",
+            marker=dict(color="green", size=13, symbol="triangle-up"),
+            name="BUY",
+        )
+    )
 
     # Plot SELL markers
     sell_df = df[df["order"] == "SELL"]
-    fig.add_trace(go.Scatter(
-        x=sell_df["timestamp"],
-        y=sell_df["price"],
-        mode='markers',
-        marker=dict(color='red', size=13, symbol="triangle-down"), #  marker=dict(color='#ff0000', opacity=0.6,symbol="diamond", size=10, line=dict(color='#ae0000', width=2)),
-        name='SELL'
-    ))
+    fig.add_trace(
+        go.Scatter(
+            x=sell_df["timestamp"],
+            y=sell_df["price"],
+            mode="markers",
+            marker=dict(
+                color="red", size=13, symbol="triangle-down"
+            ),  #  marker=dict(color='#ff0000', opacity=0.6,symbol="diamond", size=10, line=dict(color='#ae0000', width=2)),
+            name="SELL",
+        )
+    )
 
     if show_slippage:
         executed_buy_df = buy_df.copy()
@@ -123,60 +172,73 @@ def static_strategy_plot(df: pd.DataFrame, show_invalid: bool, show_slippage: bo
         executed_sell_df["executed_price"] = executed_sell_df["price"] - executed_sell_df["slippage"]
 
         # Show slippage as error bars
-        fig.add_trace(go.Scatter(
-            x=executed_buy_df["timestamp"],
-            y=executed_buy_df["executed_price"],
-            mode='markers',
-            marker=dict(color='orange', size=10, symbol="star-triangle-up-open"),  # df["slippage"].apply(lambda x: 'blue' if x > 0 else ('orange' if x < 0 else 'gray'))
-            name='Intended BUY Price'
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=executed_buy_df["timestamp"],
+                y=executed_buy_df["executed_price"],
+                mode="markers",
+                marker=dict(
+                    color="orange", size=10, symbol="star-triangle-up-open"
+                ),  # df["slippage"].apply(lambda x: 'blue' if x > 0 else ('orange' if x < 0 else 'gray'))
+                name="Intended BUY Price",
+            )
+        )
 
-        fig.add_trace(go.Scatter(
-            x=executed_sell_df["timestamp"],
-            y=executed_sell_df["executed_price"],
-            mode='markers',
-            marker=dict(color='purple', size=10, symbol="star-triangle-down-open"),
-            name='Intended SELL Price'
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=executed_sell_df["timestamp"],
+                y=executed_sell_df["executed_price"],
+                mode="markers",
+                marker=dict(color="purple", size=10, symbol="star-triangle-down-open"),
+                name="Intended SELL Price",
+            )
+        )
 
         # Add lines to indicate slippage
         for _, row in executed_buy_df.iterrows():
-            fig.add_trace(go.Scatter(
-                x=[row["timestamp"], row["timestamp"]],
-                y=[row["price"], row["executed_price"]],
-                mode="lines",
-                line=dict(color="orange", dash="dot"),
-                showlegend=False
-            ))
+            fig.add_trace(
+                go.Scatter(
+                    x=[row["timestamp"], row["timestamp"]],
+                    y=[row["price"], row["executed_price"]],
+                    mode="lines",
+                    line=dict(color="orange", dash="dot"),
+                    showlegend=False,
+                )
+            )
 
         for _, row in executed_sell_df.iterrows():
-            fig.add_trace(go.Scatter(
-                x=[row["timestamp"], row["timestamp"]],
-                y=[row["price"], row["executed_price"]],
-                mode="lines",
-                line=dict(color="purple", dash="dot"),
-                showlegend=False
-            ))
-
+            fig.add_trace(
+                go.Scatter(
+                    x=[row["timestamp"], row["timestamp"]],
+                    y=[row["price"], row["executed_price"]],
+                    mode="lines",
+                    line=dict(color="purple", dash="dot"),
+                    showlegend=False,
+                )
+            )
 
     if show_invalid:
         invalid_buy_df = df[df["order"] == "INVALID_BUY"]
-        fig.add_trace(go.Scatter(
-            x=invalid_buy_df["timestamp"],
-            y=invalid_buy_df["price"],
-            mode='markers',
-            marker=dict(color='green', size=10, symbol="triangle-up-open"),
-            name='Invalid BUY'
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=invalid_buy_df["timestamp"],
+                y=invalid_buy_df["price"],
+                mode="markers",
+                marker=dict(color="green", size=10, symbol="triangle-up-open"),
+                name="Invalid BUY",
+            )
+        )
 
         invalid_sell_df = df[df["order"] == "INVALID_SELL"]
-        fig.add_trace(go.Scatter(
-            x=invalid_sell_df["timestamp"],
-            y=invalid_sell_df["price"],
-            mode='markers',
-            marker=dict(color='red', size=10, symbol="triangle-down-open"),
-            name='Invalid SELL'
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=invalid_sell_df["timestamp"],
+                y=invalid_sell_df["price"],
+                mode="markers",
+                marker=dict(color="red", size=10, symbol="triangle-down-open"),
+                name="Invalid SELL",
+            )
+        )
 
     # Display chart
     st.plotly_chart(fig, use_container_width=True)
@@ -193,7 +255,8 @@ def show_evaluation_metrics(strategy_id: str) -> None:
 
         st.subheader("Sharpe Ratio")
         st.write(
-            "A risk-adjusted return metric that compares the average returns to the standard deviation of returns.")
+            "A risk-adjusted return metric that compares the average returns to the standard deviation of returns."
+        )
         st.latex(r"\text{Sharpe Ratio} = \frac{E[R] - R_f}{\sigma}")
         st.write("- (E[R]) is the expected return")
         st.write("- (R_f) is the risk-free rate")
@@ -202,7 +265,8 @@ def show_evaluation_metrics(strategy_id: str) -> None:
         st.subheader("Max Drawdown")
         st.write("The maximum observed loss from a peak to a trough before a new peak is attained.")
         st.latex(
-            r"\text{Max Drawdown} = \max \left( \frac{\text{Peak Value} - \text{Trough Value}}{\text{Peak Value}} \right)")
+            r"\text{Max Drawdown} = \max \left( \frac{\text{Peak Value} - \text{Trough Value}}{\text{Peak Value}} \right)"
+        )
 
         st.subheader("Win Rate")
         st.write("The percentage of trades that ended in profit.")
@@ -211,12 +275,12 @@ def show_evaluation_metrics(strategy_id: str) -> None:
         st.subheader("Average Win")
         st.write("The average profit made on winning trades.")
         st.latex(
-            r"\text{Average Win} = \frac{\text{Total Profit from Winning Trades}}{\text{Number of Winning Trades}}")
+            r"\text{Average Win} = \frac{\text{Total Profit from Winning Trades}}{\text{Number of Winning Trades}}"
+        )
 
         st.subheader("Average Loss")
         st.write("The average loss incurred on losing trades.")
-        st.latex(
-            r"\text{Average Loss} = \frac{\text{Total Loss from Losing Trades}}{\text{Number of Losing Trades}}")
+        st.latex(r"\text{Average Loss} = \frac{\text{Total Loss from Losing Trades}}{\text{Number of Losing Trades}}")
 
         st.subheader("Sortino Ratio")
         st.write("A variation of the Sharpe Ratio that only considers downside risk.")
@@ -236,8 +300,11 @@ def show_evaluation_metrics(strategy_id: str) -> None:
         st.latex(r"\text{Number of Trades} = \text{Winning Trades} + \text{Losing Trades}")
 
     strategy_evaluation = get_strategy_evaluation(strategy_id)
-    if strategy_evaluation is None or len(strategy_evaluation['metrics']) == 0:
-        st.warning("No evaluation metrics to show. No orders have been executed.", icon=":material/smart_toy:")
+    if strategy_evaluation is None or len(strategy_evaluation["metrics"]) == 0:
+        st.warning(
+            "No evaluation metrics to show. No orders have been executed.",
+            icon=":material/smart_toy:",
+        )
     else:
         html_txt = """
             <style>
@@ -359,10 +426,10 @@ def color_rows(val):
     """
     Usage: logs_df.style.applymap(color_rows, subset=['order'])
     """
-    if val == 'BUY':
-        return 'background-color: lightgreen'
-    elif val == 'SELL':
-        return 'background-color: lightcoral'
+    if val == "BUY":
+        return "background-color: lightgreen"
+    elif val == "SELL":
+        return "background-color: lightcoral"
     return ""
 
 
@@ -430,7 +497,17 @@ def strategy_plot_info() -> None:
     """)
 
 
-def strategy_info_card(strategy_id: str, quote_asset:str, base_asset: str, balance: float, time_interval: str, trades_limit: int, strategy_name: str, created_at: str, status: str) -> None:
+def strategy_info_card(
+    strategy_id: str,
+    quote_asset: str,
+    base_asset: str,
+    balance: float,
+    time_interval: str,
+    trades_limit: int,
+    strategy_name: str,
+    created_at: str,
+    status: str,
+) -> None:
     st.html(
         f"""
         <style>

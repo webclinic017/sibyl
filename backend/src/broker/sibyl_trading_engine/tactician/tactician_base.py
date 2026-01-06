@@ -1,14 +1,20 @@
-from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import BaseStrategy
-from typing import Any, Dict, List
-import time
-import threading
 import json
 import os
+import threading
+import time
+from decimal import ROUND_DOWN, Decimal
+from typing import Any
+
 import pandas as pd
-from database.strategy.strategy_db_client import StrategyDBClient
-from backend.src.broker.sibyl_trading_engine.tactician.exchange_interface import TacticianExchangeInterface
 from numpy import isnan
-from decimal import Decimal, ROUND_DOWN
+
+from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import (
+    BaseStrategy,
+)
+from backend.src.broker.sibyl_trading_engine.tactician.exchange_interface import (
+    TacticianExchangeInterface,
+)
+from database.strategy.strategy_db_client import StrategyDBClient
 
 
 class Tactician:
@@ -18,7 +24,13 @@ class Tactician:
     and log trade activity.
     """
 
-    def __init__(self, exchange_api: TacticianExchangeInterface, quote_asset: str, base_asset:str, capital_allocation: float) -> None:
+    def __init__(
+        self,
+        exchange_api: TacticianExchangeInterface,
+        quote_asset: str,
+        base_asset: str,
+        capital_allocation: float,
+    ) -> None:
         """
         Initializes the TradeExecutor.
 
@@ -41,7 +53,7 @@ class Tactician:
         self.symbol = self.exchange_api.get_market_symbol(self.quote_asset, self.base_asset)
         self.capital = capital_allocation
         self.position = 0  # Tracks how much of the asset you own
-        self.trade_history: List[Dict[str, Any]] = []  # Store all trade actions
+        self.trade_history: list[dict[str, Any]] = []  # Store all trade actions
         self.is_running = False  # Track if the strategy is running
         self.last_order_type = "None"
         self.time_interval = None
@@ -65,7 +77,6 @@ class Tactician:
         # logging.basicConfig(filename="trade_log.log", level=logging.INFO)
         self.db_client = StrategyDBClient()
 
-
     def _save_trade_history(self) -> None:
         """
         --Deprecated--
@@ -74,7 +85,6 @@ class Tactician:
         with open(self.history_file, "w") as f:
             json.dump(self.trade_history, f, indent=4)
 
-
     def _load_trade_history(self):
         """
         --Deprecated--
@@ -82,7 +92,7 @@ class Tactician:
         """
         try:
             if os.path.exists(self.history_file):
-                with open(self.history_file, "r") as f:
+                with open(self.history_file) as f:
                     self.trade_history = json.load(f)
                 return self.trade_history
             else:
@@ -99,7 +109,6 @@ class Tactician:
         with open(self.pid_file, "w") as f:
             f.write(str(self.thread_id))
 
-
     def _clear_pid(self):
         """
         --Deprecated--
@@ -108,18 +117,19 @@ class Tactician:
         if os.path.exists(self.pid_file):
             os.remove(self.pid_file)
 
-
     def fix_asset_precision(self, quote_asset_value: float = None, base_asset_value: float = None) -> float:
-
         if quote_asset_value is not None:
-            decimal_value = Decimal(quote_asset_value).quantize(Decimal(f"1e-{self.quote_precision}"), rounding=ROUND_DOWN)
+            decimal_value = Decimal(quote_asset_value).quantize(
+                Decimal(f"1e-{self.quote_precision}"), rounding=ROUND_DOWN
+            )
         else:
-            decimal_value = Decimal(base_asset_value).quantize(Decimal(f"1e-{self.base_precision}"), rounding=ROUND_DOWN)
+            decimal_value = Decimal(base_asset_value).quantize(
+                Decimal(f"1e-{self.base_precision}"), rounding=ROUND_DOWN
+            )
 
         return float(decimal_value)
 
-
-    def execute_trade(self, action: str) -> Dict[str, Any] | None:
+    def execute_trade(self, action: str) -> dict[str, Any] | None:
         """
         Executes a trade based on the strategy's signal (BUY/SELL).
 
@@ -133,40 +143,89 @@ class Tactician:
         if action == "BUY":
             if self.last_order_type != "BUY" and self.capital > self.quote_min_notional:
                 self.last_order_type = "BUY"
-                order = self.exchange_api.place_buy_order(quote_asset=self.quote_asset, base_asset=self.base_asset, quote_amount=self.fix_asset_precision(self.capital, None))
+                order = self.exchange_api.place_buy_order(
+                    quote_asset=self.quote_asset,
+                    base_asset=self.base_asset,
+                    quote_amount=self.fix_asset_precision(self.capital, None),
+                )
                 if order:
                     self.position += order["position"]
                     self.capital = self.capital - order["executed_quote_amount"]
-                    self.trade_history.append({"timestamp": time.time(), "action": "BUY", "order_id": order["order_id"], "quote_amount": float(order["executed_quote_amount"]), "price": order["price"], "amount": self.position, "status": "executed"})
-                    print(f"Tactician :: execute_trade :: \033[92m BUY ORDER \033[0m :: Bought {order["position"]} {self.base_asset} with {order["executed_quote_amount"]} {self.quote_asset} at price {float(order["price"])}")
-                    print(f"Tactician :: execute_trade :: New {self.quote_asset} Balance: {self.capital} | {self.base_asset} Position: {self.position}")
+                    self.trade_history.append(
+                        {
+                            "timestamp": time.time(),
+                            "action": "BUY",
+                            "order_id": order["order_id"],
+                            "quote_amount": float(order["executed_quote_amount"]),
+                            "price": order["price"],
+                            "amount": self.position,
+                            "status": "executed",
+                        }
+                    )
+                    print(
+                        f"Tactician :: execute_trade :: \033[92m BUY ORDER \033[0m :: Bought {order['position']} {self.base_asset} with {order['executed_quote_amount']} {self.quote_asset} at price {float(order['price'])}"
+                    )
+                    print(
+                        f"Tactician :: execute_trade :: New {self.quote_asset} Balance: {self.capital} | {self.base_asset} Position: {self.position}"
+                    )
                 else:
-                    print(f"Tactician :: execute_trade :: \033[92m BUY ORDER \033[0m Failed.")
-                return {"timestamp": time.time(), "action": "BUY", "order_id": order["order_id"], "quote_amount": float(order["executed_quote_amount"]), "price": order["price"], "amount": self.position, "status": "executed"}
+                    print("Tactician :: execute_trade :: \033[92m BUY ORDER \033[0m Failed.")
+                return {
+                    "timestamp": time.time(),
+                    "action": "BUY",
+                    "order_id": order["order_id"],
+                    "quote_amount": float(order["executed_quote_amount"]),
+                    "price": order["price"],
+                    "amount": self.position,
+                    "status": "executed",
+                }
             else:
-                print(f"Tactician :: execute_trade :: \033[92m BUY ORDER \033[0m Invalid")
+                print("Tactician :: execute_trade :: \033[92m BUY ORDER \033[0m Invalid")
                 return None
 
         elif action == "SELL":
             if self.last_order_type != "SELL" and self.position > 0:
                 self.last_order_type = "SELL"
-                order = self.exchange_api.place_sell_order(quote_asset=self.quote_asset, base_asset=self.base_asset, quantity=self.fix_asset_precision(None, self.position))
+                order = self.exchange_api.place_sell_order(
+                    quote_asset=self.quote_asset,
+                    base_asset=self.base_asset,
+                    quantity=self.fix_asset_precision(None, self.position),
+                )
                 if order:
                     self.capital += float(order["executed_quote_amount"])
                     self.position = self.fix_asset_precision(None, self.position - float(order["position"]))
-                    self.trade_history.append({"timestamp": time.time(), "action": "SELL", "order_id": order["order_id"], "price": float(order["price"]), "amount": self.position, "status": "executed"})
-                    print(f"Tactician :: execute_trade :: \033[93m SELL ORDER \033[0m :: Sold {order["position"]} {self.base_asset} for {order["executed_quote_amount"]} {self.quote_asset} at price {order["price"]}")
-                    print(f"Tactician :: execute_trade :: New {self.quote_asset} Balance: {self.capital} | {self.base_asset} Position: {self.position}")
+                    self.trade_history.append(
+                        {
+                            "timestamp": time.time(),
+                            "action": "SELL",
+                            "order_id": order["order_id"],
+                            "price": float(order["price"]),
+                            "amount": self.position,
+                            "status": "executed",
+                        }
+                    )
+                    print(
+                        f"Tactician :: execute_trade :: \033[93m SELL ORDER \033[0m :: Sold {order['position']} {self.base_asset} for {order['executed_quote_amount']} {self.quote_asset} at price {order['price']}"
+                    )
+                    print(
+                        f"Tactician :: execute_trade :: New {self.quote_asset} Balance: {self.capital} | {self.base_asset} Position: {self.position}"
+                    )
                 else:
-                    print(f"Tactician :: execute_trade :: \033[93m SELL ORDER \033[0m Failed.")
-                return {"timestamp": time.time(), "action": "SELL", "order_id": order["order_id"], "price": float(order["price"]), "amount": self.position, "status": "executed"}
+                    print("Tactician :: execute_trade :: \033[93m SELL ORDER \033[0m Failed.")
+                return {
+                    "timestamp": time.time(),
+                    "action": "SELL",
+                    "order_id": order["order_id"],
+                    "price": float(order["price"]),
+                    "amount": self.position,
+                    "status": "executed",
+                }
             else:
-                print(f"Tactician :: execute_trade :: \033[93m SELL ORDER \033[0m Invalid")
+                print("Tactician :: execute_trade :: \033[93m SELL ORDER \033[0m Invalid")
                 return None
         return None
 
-
-    def get_trade_history(self) -> List[Dict[str, Any]]:
+    def get_trade_history(self) -> list[dict[str, Any]]:
         """
         Returns the history of all executed trades (buy/sell actions, price, amount).
 
@@ -174,7 +233,6 @@ class Tactician:
             List[Dict[str, Any]]: A list of dictionaries with trade details.
         """
         return self.trade_history
-
 
     def get_status(self) -> str:
         """
@@ -185,7 +243,6 @@ class Tactician:
         """
         return "Running" if self.is_running else "Stopped"
 
-
     def initiate_dataset(self, limit: int) -> None:
         """
         Calls the Exchange API to get the latest price data. It fetches :limit: prices on call and initiates the dataset.
@@ -195,7 +252,6 @@ class Tactician:
             limit (int): The number of prices to fetch.
         """
         self.dataset = self.exchange_api.get_kline_data(symbol=self.symbol, interval=self.time_interval, limit=limit)
-
 
     def update_dataset(self) -> None:
         """
@@ -223,8 +279,14 @@ class Tactician:
         self.dataset = self.dataset.iloc[1:].reset_index(drop=True)
         self.dataset = pd.concat([self.dataset, last_kline], ignore_index=True)
 
-
-    def strategy_loop(self, strategy_id: str, strategy: BaseStrategy, interval: int, min_capital: float, trades_limit: int) -> None:
+    def strategy_loop(
+        self,
+        strategy_id: str,
+        strategy: BaseStrategy,
+        interval: int,
+        min_capital: float,
+        trades_limit: int,
+    ) -> None:
         """
         Runs the trading strategy in a loop, checking for signals and executing trades.
 
@@ -240,7 +302,7 @@ class Tactician:
         self.thread_id = threading.get_ident()
         while self.is_running:
             # exit after N trades, must be even to end with a sell
-            if len(self.get_trade_history()) >= trades_limit*2:
+            if len(self.get_trade_history()) >= trades_limit * 2:
                 print(f"Maximum number of trades reached {trades_limit}.")
                 break
             # Fetch latest klines data
@@ -251,11 +313,13 @@ class Tactician:
             latest_signal = signals.iloc[-1]["signal"]
             latest_price = signals.iloc[-1]["close_price"]
             timestamp = signals.iloc[-1]["timestamp"]
-            print(f"Tactician :: Strategy signals | t: {pd.to_datetime(timestamp, unit="ms").strftime('%H:%M:%S')}, p: {latest_price}, action: {latest_signal}")
+            print(
+                f"Tactician :: Strategy signals | t: {pd.to_datetime(timestamp, unit='ms').strftime('%H:%M:%S')}, p: {latest_price}, action: {latest_signal}"
+            )
 
             if latest_signal in ["BUY", "SELL"]:
                 res = self.execute_trade(latest_signal)
-                if res is None: # order failed
+                if res is None:  # order failed
                     latest_signal = f"INVALID_{latest_signal}"
                 else:
                     slippage = res["price"] - latest_price
@@ -269,8 +333,15 @@ class Tactician:
             # Wait before checking again
             time.sleep(interval)
 
-
-    def run_strategy(self, strategy_id: str, strategy: BaseStrategy, interval: str, min_capital: float, trades_limit: int, dataset_size: int) -> None:
+    def run_strategy(
+        self,
+        strategy_id: str,
+        strategy: BaseStrategy,
+        interval: str,
+        min_capital: float,
+        trades_limit: int,
+        dataset_size: int,
+    ) -> None:
         """
         Initiates the trading loop.
 
@@ -282,19 +353,49 @@ class Tactician:
             trades_limit (int): Number of trades to execute before stopping. Must be even to end with a SELL.
             dataset_size (int): The size of the dataset to be fed in the strategy algorithm.
         """
-        time_interval_dict = {'1s': 1, '15s': 15, '1m': 60, '5m': 300, '15m': 900,
-                         '30m': 1800, '1h': 3600, '4h': 14400, '12h': 43200, '1d': 86400}
+        time_interval_dict = {
+            "1s": 1,
+            "15s": 15,
+            "1m": 60,
+            "5m": 300,
+            "15m": 900,
+            "30m": 1800,
+            "1h": 3600,
+            "4h": 14400,
+            "12h": 43200,
+            "1d": 86400,
+        }
 
         self.time_interval = interval
-        self.is_price_only = strategy.is_price_only  # whether the strategy needs only the close price and not OHLCV data
-        self.db_client.add_strategy(strategy_id, self.quote_asset, self.base_asset, self.capital, interval, trades_limit, strategy.name, int(time.time()*1000))
+        self.is_price_only = (
+            strategy.is_price_only
+        )  # whether the strategy needs only the close price and not OHLCV data
+        self.db_client.add_strategy(
+            strategy_id,
+            self.quote_asset,
+            self.base_asset,
+            self.capital,
+            interval,
+            trades_limit,
+            strategy.name,
+            int(time.time() * 1000),
+        )
 
         print(f"Tactician :: Initiating Strategy loop with id {strategy_id}.")
         self.initiate_dataset(dataset_size)
-        self.thread = threading.Thread(target=self.strategy_loop, daemon=True, args=(strategy_id, strategy, time_interval_dict[interval], min_capital, trades_limit))
+        self.thread = threading.Thread(
+            target=self.strategy_loop,
+            daemon=True,
+            args=(
+                strategy_id,
+                strategy,
+                time_interval_dict[interval],
+                min_capital,
+                trades_limit,
+            ),
+        )
         self.thread.start()
         print("Tactician :: Strategy loop started.")
-
 
     def stop_strategy(self) -> None:
         """
@@ -307,8 +408,7 @@ class Tactician:
             self.thread.join()
         print("Tactician :: Strategy has been stopped.")
 
-
-    def get_position_info(self) -> Dict[str, float]:
+    def get_position_info(self) -> dict[str, float]:
         """
         Returns the current position and available capital.
 
@@ -318,4 +418,4 @@ class Tactician:
         return {"position": self.position, "capital": self.capital}
 
 
-#TODO initialize min notionals for buy and sell
+# TODO initialize min notionals for buy and sell

@@ -1,14 +1,14 @@
+from binance.client import Client
+
 from backend.src.exchange_client.binance_client import BinanceClient
 from database.api_keys_db_client import APIEncryptedDatabase
-from binance.client import Client
 
 
 class BinanceTestnetClient(BinanceClient):
-
     def __init__(self):
         super().__init__()
-        self.name = 'binance_testnet'
-        self.api_base_url = 'https://testnet.binance.vision'
+        self.name = "binance_testnet"
+        self.api_base_url = "https://testnet.binance.vision"
         # Set API Keys
         api_creds = APIEncryptedDatabase.get_api_key_by_name(self.name)
         if api_creds is None:

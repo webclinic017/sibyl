@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+
 from langchain.llms.base import LLM
 
 
@@ -33,11 +33,9 @@ class LLMBase(ABC):
         self.stream: bool = stream
         self.api_key: str = ""
 
-
     @abstractmethod
     def initialize_model(self):
         pass
-
 
     @abstractmethod
     def generate_response(self, prompt: str, **kwargs) -> str:
@@ -50,7 +48,6 @@ class LLMBase(ABC):
         """
         pass
 
-
     @property
     @abstractmethod
     def _llm_type(self) -> str:
@@ -59,14 +56,12 @@ class LLMBase(ABC):
         """
         pass
 
-
     @abstractmethod
-    def get_available_models(self) -> List[str]:
+    def get_available_models(self) -> list[str]:
         """
         get available models
         """
         pass
-
 
     @abstractmethod
     def as_langchain_llm(self) -> LLM:

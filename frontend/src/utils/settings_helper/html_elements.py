@@ -172,8 +172,7 @@ def status_card_header(title: str):
     return
 
 
-def status_card(name: str, logo: str, status: str = 'Active') -> str | None:
-
+def status_card(name: str, logo: str, status: str = "Active") -> str | None:
     html_txt = f"""
             <div class="settings-card settings-card-{status[0:3]}" style="display:inline-block;">
                 <div class="settings-card-illustration settings-card-illustration-{name[0:2]}">
@@ -295,7 +294,7 @@ def compact_card_header(title: str):
     return
 
 
-def compact_card(name: str, logo: str, status: str = 'Active') -> str | None:
+def compact_card(name: str, logo: str, status: str = "Active") -> str | None:
     html_txt = f"""
             <div class="mini-card mini-card-{status}" style="display:inline-block;">
                 <div class="mini-card-icon mini-card-shadow-{name[0:2]}">

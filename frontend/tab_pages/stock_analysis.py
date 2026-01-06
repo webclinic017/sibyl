@@ -1,14 +1,15 @@
 import streamlit as st
+
 from frontend.db.stocks_db_client import get_stocks_list
 from frontend.src.utils.stock_analysis_helper.ui_elements import get_stock_analysis
 from frontend.src.utils.ui_elements import fix_page_layout, set_page_title
 
-
-fix_page_layout('📈Stock Market')
+fix_page_layout("📈Stock Market")
 set_page_title("Stock Market Analysis")
 
 st.write(
-    "Choose the Company you want in order to get all the information available. Once the company is chosen, the Stock Market Analysis page will display all the information regarding the company and its stock. The advisor tab, using AI and financial formulas and algorithms will determine if the company's stock is worth buying.")
+    "Choose the Company you want in order to get all the information available. Once the company is chosen, the Stock Market Analysis page will display all the information regarding the company and its stock. The advisor tab, using AI and financial formulas and algorithms will determine if the company's stock is worth buying."
+)
 
 if "selected_stock" not in st.session_state:
     stocks = get_stocks_list()
@@ -23,7 +24,12 @@ if "selected_stock" not in st.session_state:
                 st.write(selected_stock)
                 st.rerun()
 else:
-    if st.sidebar.button("Reset Analysis", type="primary", use_container_width=True, icon=":material/restart_alt:"):
+    if st.sidebar.button(
+        "Reset Analysis",
+        type="primary",
+        use_container_width=True,
+        icon=":material/restart_alt:",
+    ):
         del st.session_state.selected_stock
         st.rerun()
     with st.spinner("Fetching Stock Data..."):

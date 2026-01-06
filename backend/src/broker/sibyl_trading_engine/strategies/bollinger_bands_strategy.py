@@ -1,6 +1,9 @@
-from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import BaseStrategy
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from backend.src.broker.sibyl_trading_engine.strategies.strategy_base import (
+    BaseStrategy,
+)
 
 
 class BollingerBandsStrategy(BaseStrategy):
@@ -25,7 +28,6 @@ class BollingerBandsStrategy(BaseStrategy):
         self.name = "Bollinger Bands"
         self.is_price_only = True
 
-
     def calculate_bollinger_bands(self) -> None:
         """
         Computes the Bollinger Bands and stores them in the data DataFrame.
@@ -36,7 +38,6 @@ class BollingerBandsStrategy(BaseStrategy):
         self.data["upper_band"] = self.data["SMA"] + (self.data["std_dev"] * self.std_dev)
         self.data["lower_band"] = self.data["SMA"] - (self.data["std_dev"] * self.std_dev)
 
-
     def generate_signals(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Generates buy, sell, or hold signals based on Bollinger Bands.
@@ -46,6 +47,9 @@ class BollingerBandsStrategy(BaseStrategy):
         """
         self.data = data
         self.calculate_bollinger_bands()
-        self.data["signal"] = np.where(self.data["close_price"] < self.data["lower_band"], "BUY",
-                                       np.where(self.data["close_price"] > self.data["upper_band"], "SELL", "HOLD"))
+        self.data["signal"] = np.where(
+            self.data["close_price"] < self.data["lower_band"],
+            "BUY",
+            np.where(self.data["close_price"] > self.data["upper_band"], "SELL", "HOLD"),
+        )
         return self.data[["timestamp", "close_price", "upper_band", "lower_band", "signal"]]

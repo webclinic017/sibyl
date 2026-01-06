@@ -1,4 +1,3 @@
-from typing import Dict, List
 from backend.src.broker.sibyl_trading_engine.tactician.tactician_base import Tactician
 
 
@@ -10,8 +9,7 @@ class StrategyRuntimeHandler:
 
     def __init__(self) -> None:
         """Initializes the handler with an empty dictionary of running strategies."""
-        self.running_strategies: Dict[str, Tactician] = {}
-
+        self.running_strategies: dict[str, Tactician] = {}
 
     def add_strategy(self, strategy_id: str, strategy: Tactician) -> None:
         """Adds a new strategy to the running strategies list.
@@ -22,7 +20,6 @@ class StrategyRuntimeHandler:
         """
         self.running_strategies[strategy_id] = strategy
 
-
     def remove_strategy(self, strategy_id: str) -> None:
         """Removes a strategy from the running strategies list.
 
@@ -30,7 +27,6 @@ class StrategyRuntimeHandler:
             strategy_id (str): Unique identifier of the strategy.
         """
         del self.running_strategies[strategy_id]
-
 
     def stop_strategy(self, strategy_id: str) -> int | None:
         """Stops a running strategy by invoking its stop method.
@@ -49,8 +45,7 @@ class StrategyRuntimeHandler:
         del self.running_strategies[strategy_id]  # Remove from active strategies
         return 1
 
-
-    def get_active_strategies(self) -> List[str]:
+    def get_active_strategies(self) -> list[str]:
         """Returns a list of active strategy IDs.
 
         Returns:
