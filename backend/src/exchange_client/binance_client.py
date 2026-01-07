@@ -27,7 +27,11 @@ class BinanceClient(ExchangeAPIClient):
         if api_creds is None:
             self.client = None
         else:
-            self.client = Client(api_creds.api_key, api_creds.secret_key)
+            try:
+                self.client = Client(api_creds.api_key, api_creds.secret_key)
+            except Exception as e:
+                print(f"Error initializing Binance client: {e}")
+                self.client = None
 
     def check_status(self) -> str:
         """
@@ -47,6 +51,9 @@ class BinanceClient(ExchangeAPIClient):
             return "Active"
         except BinanceAPIException:
             return "Invalid Credentials"
+        except Exception as e:
+            print(f"Error checking Binance status: {e}")
+            return "Unavailable"
 
     def place_spot_order(
         self,

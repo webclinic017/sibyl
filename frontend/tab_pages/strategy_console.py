@@ -54,7 +54,7 @@ if strategies:
     st.info(
         "💡 The **DateTime** above refers to the **UTC** timestamp. So times may be different from your local time."
     )
-    df_to_show = edited_df.loc[edited_df["monitor"] is True].copy().reset_index(drop=True)
+    df_to_show = edited_df.loc[edited_df["monitor"] == True].copy().reset_index(drop=True)
 
     # st.dataframe(df, use_container_width=True, hide_index=True)
     if df_to_show.shape[0] == 0:

@@ -55,7 +55,7 @@ else:
         st.info(
             "💡 The **DateTime** above refers to the **UTC** timestamp. So times may be different from your local time."
         )
-        df_to_plot = edited_df.loc[edited_df["show_plot"] is True].copy().reset_index(drop=True)
+        df_to_plot = edited_df.loc[edited_df["show_plot"] == True].copy().reset_index(drop=True)
         if df_to_plot.shape[0] > 0:
             html_content = """
             <div style="text-align: center; color: red; font-weight: bold; font-size: 18px;">

@@ -82,7 +82,7 @@ PRICE_API = {
 
 def show_status_cards(only_exchange: bool = False) -> None:
     status_json = fetch_apis_status("all")
-    list(status_json.values())
+    status_list = list(status_json.values())
     # EXCHANGE APIS
     global CRYPTO_APIS
     status_card_style()
@@ -158,7 +158,7 @@ def exchange_api_status_check() -> None:
 
         for exchange in exchanges:
             exchange_name = exchange.lower().replace(" ", "_")
-            status = status_dict[exchange_name]
+            status = status_dict.get(exchange_name, "Unavailable")
             session_state[f"{exchange_name}_api_status"] = status
             if status == "Active":
                 session_state["available_exchange_apis"].append(exchange)
