@@ -14,4 +14,8 @@ class BinanceTestnetClient(BinanceClient):
         if api_creds is None:
             self.client = None
         else:
-            self.client = Client(api_creds.api_key, api_creds.secret_key, testnet=True)
+            try:
+                self.client = Client(api_creds.api_key, api_creds.secret_key, testnet=True)
+            except Exception as e:
+                print(f"Error initializing Binance Testnet client: {e}")
+                self.client = None

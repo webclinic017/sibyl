@@ -131,6 +131,8 @@ Visualize the data with custom plots and tables for clear insights.
 
 Track your profits and losses with detailed tables and plots, allowing you to measure the success of each trading order.
 
+![analytics_ui](https://raw.githubusercontent.com/nMaroulis/sibyl/refs/heads/main/assets/gifs/analytics_1_ui.gif)
+
 ---
 
 ### Crypto News & Market Sentiment - Reporter Module 🕵🏻‍
