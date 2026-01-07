@@ -19,7 +19,7 @@ def plot_block_height_weight_tx_count(df: DataFrame):
             y=df["Block Size"],
             mode="lines",
             name="Block Size",
-            line=dict(color="blue"),
+            line={"color": "blue"},
         ),
         secondary_y=False,  # Place this trace on the primary y-axis
     )
@@ -31,7 +31,7 @@ def plot_block_height_weight_tx_count(df: DataFrame):
             y=df["Transaction Count"],
             mode="lines",
             name="Transaction Count",
-            line=dict(color="green"),
+            line={"color": "green"},
         ),
         secondary_y=True,  # Place this trace on the secondary y-axis
     )

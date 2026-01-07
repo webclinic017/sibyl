@@ -2,7 +2,7 @@ from streamlit import button, fragment, markdown
 
 
 @fragment()
-def oracle_button(module: str, enabled: bool = True, content: dict = None):
+def oracle_button(module: str, enabled: bool = True, content: dict | None = None):
     button_style = """
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -28,7 +28,7 @@ def oracle_button(module: str, enabled: bool = True, content: dict = None):
             --hover-transform: scale(1) rotate(0deg);
             transform: var(--hover-transform) translateY(0);
         }
-        
+
         button[kind="tertiary"]::before {
             content: "\\f7e4"; /* Unicode for fa-search */
             font-family: "Font Awesome 6 Free"; /* or 5 if you’re using FA 5 */

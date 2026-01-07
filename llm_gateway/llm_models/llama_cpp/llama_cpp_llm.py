@@ -19,7 +19,7 @@ class LlamaCppLocalLLM(LLMBase):
     def __init__(
         self,
         model_name: str = "openhermes-2.5-mistral-7b.Q4_K_M",
-        session_id: str = None,
+        session_id: str | None = None,
         stream: bool = False,
     ):
         super().__init__(model_name=model_name, session_id=session_id, stream=stream)

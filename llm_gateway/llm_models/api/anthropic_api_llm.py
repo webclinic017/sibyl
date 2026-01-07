@@ -13,7 +13,7 @@ class AnthropicAPILLM(LLMBase):
     def __init__(
         self,
         model_name: str = "claude-3-7-sonnet-20250219",
-        session_id: str = None,
+        session_id: str | None = None,
         stream: bool = False,
     ):
         super().__init__(model_name=model_name, session_id=session_id, stream=stream)

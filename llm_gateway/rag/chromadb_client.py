@@ -286,24 +286,24 @@ class ChromaDBClient:
             sources += f"- {doc['type']} (page: {doc['page_num']}): {doc['title']} | {doc['href']}\n"
 
         prompt = f"""
-            You are a knowledgeable AI assistant specialized in cryptocurrency, blockchain, and crypto technology. 
-            Your goal is to provide accurate, clear, and concise answers based on the provided context. 
+            You are a knowledgeable AI assistant specialized in cryptocurrency, blockchain, and crypto technology.
+            Your goal is to provide accurate, clear, and concise answers based on the provided context.
             If the context does not contain enough relevant information, acknowledge the limitation rather than making up an answer.
-            
+
             ### User Query:
             {question}
-            
+
             ### Context (Relevant Information Extracted from Documents):
             {context}
-            
+
             ### Instructions:
-            - Answer the user’s query **only using the provided context**.  
-            - If the context does not contain enough information, state:  
-              *"The provided information does not contain enough details to answer your question. Would you like me to suggest general insights based on my knowledge?"*  
-            - Keep your response factual, direct, and professional.  
-            - If necessary, reference key concepts from blockchain, DeFi, NFTs, or cryptocurrencies to clarify your answer.  
-            - Use bullet points for structured explanations when helpful.  
-            
+            - Answer the user’s query **only using the provided context**.
+            - If the context does not contain enough information, state:
+              *"The provided information does not contain enough details to answer your question. Would you like me to suggest general insights based on my knowledge?"*
+            - Keep your response factual, direct, and professional.
+            - If necessary, reference key concepts from blockchain, DeFi, NFTs, or cryptocurrencies to clarify your answer.
+            - Use bullet points for structured explanations when helpful.
+
             ### Response:"""
 
         # prompt = f"""

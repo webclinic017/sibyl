@@ -27,12 +27,12 @@ from frontend.src.utils.reporter_helper.client import (
 
 def get_fear_and_greed_index_gauge_plot():
     with expander("What is the **Fear & Greed Index**?", expanded=True):
-        markdown("""The crypto market behaviour is very emotional. People tend to get greedy when the market is rising 
-        which results in FOMO (Fear of missing out). Also, people often sell their coins in irrational reaction of seeing 
-        red numbers. With our Fear and Greed Index, we try to save you from your own emotional overreactions. There are two 
-        simple assumptions: Extreme fear can be a sign that investors are too worried. That could be a buying opportunity. 
-        When Investors are getting too greedy, that means the market is due for a correction. Therefore, we analyze the current 
-        sentiment of the Bitcoin market and crunch the numbers into a simple meter from 0 to 100. Zero means "Extreme Fear", 
+        markdown("""The crypto market behaviour is very emotional. People tend to get greedy when the market is rising
+        which results in FOMO (Fear of missing out). Also, people often sell their coins in irrational reaction of seeing
+        red numbers. With our Fear and Greed Index, we try to save you from your own emotional overreactions. There are two
+        simple assumptions: Extreme fear can be a sign that investors are too worried. That could be a buying opportunity.
+        When Investors are getting too greedy, that means the market is due for a correction. Therefore, we analyze the current
+        sentiment of the Bitcoin market and crunch the numbers into a simple meter from 0 to 100. Zero means "Extreme Fear",
         while 100 means "Extreme Greed". See below for further information on our data sources.""")
         caption("Source: alternative.me")
 
@@ -253,7 +253,7 @@ def get_news_sentiment(model: str = "vader", website: str = "cointelegraph"):
 
         fig.update_layout(margin=go.layout.Margin(t=0, b=0), height=200, showlegend=False)
         # fig.update(config=dict(displayModeBar=False))
-        plotly_chart(fig, use_container_width=True, config=dict(displayModeBar=False))
+        plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
     else:
         st_error("Text Sentiment Failed! Check NLP settings", icon=":material/error:")
     return 1

@@ -77,7 +77,7 @@ def show_line_plot_with_analytics(pair_symbol: str, price_hist_df: DataFrame) ->
                 y=concat([price_hist_df["UpperBand"], price_hist_df["LowerBand"][::-1]]),
                 fill="toself",
                 fillcolor="rgba(255, 165, 0, 0.5)",
-                line=dict(color="rgba(255, 165, 0, 0)"),
+                line={"color": "rgba(255, 165, 0, 0)"},
                 name="Bollinger Bands Interval",
             )
         )
@@ -90,14 +90,14 @@ def show_line_plot_with_analytics(pair_symbol: str, price_hist_df: DataFrame) ->
                 yaxis="y2",
                 name="RSI",
                 opacity=0.5,
-                line=dict(color="purple"),
+                line={"color": "purple"},
             )
         )
         fig.update_layout(
             title=f"{pair_symbol} Price Analysis",
             xaxis_title="Date",
             yaxis_title="Price",
-            yaxis2=dict(title="RSI", overlaying="y", side="right"),
+            yaxis2={"title": "RSI", "overlaying": "y", "side": "right"},
             showlegend=True,
         )
         plotly_chart(fig, use_container_width=True)

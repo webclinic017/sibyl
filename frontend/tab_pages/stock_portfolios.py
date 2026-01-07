@@ -59,7 +59,7 @@ else:
     df, senator_totals = process_trades(trades)
 
     st.sidebar.header("Filters")
-    selected_senator = st.sidebar.selectbox("Select Senator", ["All"] + sorted(df["senator"].unique()))
+    selected_senator = st.sidebar.selectbox("Select Senator", ["All", *sorted(df["senator"].unique())])
 
     # Filter based on selection
     if selected_senator != "All":

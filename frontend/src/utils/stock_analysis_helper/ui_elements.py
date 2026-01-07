@@ -145,7 +145,7 @@ def display_company_info(info: dict, stock_symbol: str):
                     <p class="officer-title">{officer.get("title", "N/A")}</p>
                     <p class="officer-name">{officer.get("name", "N/A")}</p>
                     <p class="officer-details">
-                        <strong>Age:</strong> {officer.get("age", "N/A")} | 
+                        <strong>Age:</strong> {officer.get("age", "N/A")} |
                         <strong>Total Pay (FY 2024):</strong> ${officer.get("totalPay", "N/A")}
                     </p>
                 </div>
@@ -174,7 +174,7 @@ def display_company_info(info: dict, stock_symbol: str):
 
 
 @st.dialog("Oracle Advice", width="large")
-def get_oracle_advice(symbol: str, model_source: str, model_type: str, model_name: str = None):
+def get_oracle_advice(symbol: str, model_source: str, model_type: str, model_name: str | None = None):
     with st.spinner("Oracle is generating advice..."):
         llm_advice = fetch_stock_advice(
             model_source=model_source,

@@ -27,7 +27,7 @@ def show_info():
         The highest-scoring document is selected as the best answer.\n
         **Step 4: Threshold-Based Filtering**\n
         If the relevance score < threshold (e.g., 0.5) → The system responds with:\n
-        "I couldn't find relevant information in the knowledge base.". 
+        "I couldn't find relevant information in the knowledge base.".
         This prevents hallucinations and ensures accuracy.\n
         **Step 5: LLM Completion for Final Answer**\n
         Instead of returning the document as-is, we format it into a prompt and send it to an LLM (e.g., GPT-4, Mistral, or Llama-3 via Hugging Face API).""")

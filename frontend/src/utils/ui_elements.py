@@ -40,11 +40,11 @@ def fix_page_layout(page_name: str, padding_top: str = "2.1rem"):
 def set_page_title(page_name: str):
     html(f"""
         <h2 style="
-            text-align: left; 
-            margin-top: 1em; 
-            padding: 0; 
-            font-size: 1.5rem; 
-            font-weight: 700; 
+            text-align: left;
+            margin-top: 1em;
+            padding: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
             color: #424242;  /* Deep gray for a refined look */
             border-left: 5px solid #e07a5f; /* Soft orange accent */
             padding-left: 12px; /* Spacing for the border effect */

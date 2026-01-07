@@ -117,7 +117,9 @@ class Tactician:
         if os.path.exists(self.pid_file):
             os.remove(self.pid_file)
 
-    def fix_asset_precision(self, quote_asset_value: float = None, base_asset_value: float = None) -> float:
+    def fix_asset_precision(
+        self, quote_asset_value: float | None = None, base_asset_value: float | None = None
+    ) -> float:
         if quote_asset_value is not None:
             decimal_value = Decimal(quote_asset_value).quantize(
                 Decimal(f"1e-{self.quote_precision}"), rounding=ROUND_DOWN

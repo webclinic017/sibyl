@@ -9,7 +9,7 @@ class LLMBase(ABC):
     Supports multiple providers (Hugging Face, OpenAI API, etc.).
     """
 
-    def __init__(self, model_name: str, session_id: str = None, stream: bool = False):
+    def __init__(self, model_name: str, session_id: str | None = None, stream: bool = False):
         """
         LLM model params.
 

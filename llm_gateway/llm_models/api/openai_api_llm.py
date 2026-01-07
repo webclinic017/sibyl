@@ -14,7 +14,7 @@ class OpenAIAPILLM(LLMBase):
     def __init__(
         self,
         model_name: str = "gpt-4-turbo",
-        session_id: str = None,
+        session_id: str | None = None,
         stream: bool = False,
     ):
         super().__init__(model_name=model_name, session_id=session_id, stream=stream)

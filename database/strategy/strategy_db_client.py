@@ -121,7 +121,7 @@ class StrategyDBClient:
         if timestamp:
             try:
                 # Ensure timestamp is a number
-                if not isinstance(timestamp, (int, float)):
+                if not isinstance(timestamp, int | float):
                     raise ValueError("Timestamp must be a Unix timestamp (int or float).")
 
                 results = [r for r in results if r["timestamp"] > timestamp]

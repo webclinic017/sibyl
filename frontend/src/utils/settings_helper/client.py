@@ -13,7 +13,9 @@ def fetch_apis_status(api_name: str = "all") -> dict:
         return {}
 
 
-def post_new_api_keys(api_name: str, api_key: str, secret_key: str = None, api_metadata: str = None) -> bool:
+def post_new_api_keys(
+    api_name: str, api_key: str, secret_key: str | None = None, api_metadata: str | None = None
+) -> bool:
     url = f"{BACKEND_SERVER_ADDRESS}/technician/credentials/apis/add"
 
     data = {

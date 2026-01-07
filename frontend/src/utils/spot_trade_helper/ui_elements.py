@@ -173,19 +173,19 @@ def plot_orderbook(exchange: str, quote_asset: str, base_asset: str, limit: int)
             <div id="container"></div>
             <button id="animation-toggle" class="highcharts-demo-button">Stop animation</button>
         </figure>
-    
+
         <script>
         function getRandomNumber(min, max) {{
             return Math.round(Math.random() * (max - min)) + min;
         }}
-    
+
         function generateBidAndAskData(n) {{
             const data = {data}
             return data;
         }}
-    
+
         const [bidsData, asksData] = generateBidAndAskData(10);
-    
+
         function updateData(chart) {{
             const data = generateBidAndAskData(10);
             chart.series.forEach((s, i) => {{
@@ -193,7 +193,7 @@ def plot_orderbook(exchange: str, quote_asset: str, base_asset: str, limit: int)
             }});
             chart.redraw();
         }}
-    
+
         Highcharts.chart('container', {{
             chart: {{
                 animation: {{
@@ -208,7 +208,7 @@ def plot_orderbook(exchange: str, quote_asset: str, base_asset: str, limit: int)
                     load() {{
                         const chart = this,
                             toggleButton = document.getElementById('animation-toggle');
-    
+
                         let intervalId = null;
                         const toggleInterval = () => {{
                             if (intervalId) {{
@@ -234,27 +234,27 @@ def plot_orderbook(exchange: str, quote_asset: str, base_asset: str, limit: int)
                                 toggleButton.innerText = 'Stop animation';
                             }}
                         }};
-    
+
                         toggleButton.addEventListener('click', toggleInterval);
                         toggleInterval();
                     }}
                 }}
             }},
-    
+
             accessibility: {{
                 point: {{
                     descriptionFormat: 'Price: {{price:.1f}}USD, ' +
                         '{{series.name}}: {{y}}'
                 }}
             }},
-    
+
             title: {{
                 text: 'Order book live chart',
                 style: {{
                     color: '#23232f'
                 }}
             }},
-    
+
             tooltip: {{
                 headerFormat: 'Price: <b>${{point.point.price:,.1f}}</b></br>',
                 pointFormat: '{{series.name}}: <b>{{point.y:,.0f}}</b>',
@@ -262,14 +262,14 @@ def plot_orderbook(exchange: str, quote_asset: str, base_asset: str, limit: int)
                 positioner(labelWidth, _, point) {{
                     const {{ plotX, plotY, h }} = point,
                         negative = plotX < this.chart.yAxis[0].left;
-    
+
                     return {{
                         x: negative ? plotX + h - labelWidth + 10 : plotX - h + 10,
                         y: plotY
                     }};
                 }}
             }},
-    
+
             xAxis: [{{
                 reversed: true,
                 visible: false,
@@ -289,7 +289,7 @@ def plot_orderbook(exchange: str, quote_asset: str, base_asset: str, limit: int)
                     description: 'Ask orders'
                 }}
             }}],
-    
+
             yAxis: [{{
                 offset: 0,
                 visible: true,
@@ -347,11 +347,11 @@ def plot_orderbook(exchange: str, quote_asset: str, base_asset: str, limit: int)
                     y: 10
                 }}
             }}],
-    
+
             legend: {{
                 enabled: false
             }},
-    
+
             navigation: {{
                 buttonOptions: {{
                     theme: {{
@@ -359,7 +359,7 @@ def plot_orderbook(exchange: str, quote_asset: str, base_asset: str, limit: int)
                     }}
                 }}
             }},
-    
+
             plotOptions: {{
                 series: {{
                     animation: false,
@@ -373,7 +373,7 @@ def plot_orderbook(exchange: str, quote_asset: str, base_asset: str, limit: int)
                     crisp: false
                 }}
             }},
-    
+
             series: [{{
                 dataLabels: [{{
                     align: 'right',

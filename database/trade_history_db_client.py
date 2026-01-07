@@ -4,7 +4,7 @@ import sqlite3
 from dotenv import load_dotenv
 
 """
-This script uses the sqlite3 module to connect to an SQLite database file called trade_history.db. 
+This script uses the sqlite3 module to connect to an SQLite database file called trade_history.db.
 It creates a table named "trading_history" with the specified fields
 """
 
@@ -61,16 +61,16 @@ class TradeHistoryDBClient:
         order_type: str,
         order_status: str,
         time_in_force: str,
-        commission: float = None,
-        commission_asset: str = None,
-        self_trade_prevention_mode: str = None,
+        commission: float | None = None,
+        commission_asset: str | None = None,
+        self_trade_prevention_mode: str | None = None,
     ):
         conn = sqlite3.connect(cls.DB_PATH)  # Create/Connect to the SQLite database
         cursor = conn.cursor()  # Create a cursor object to execute SQL commands
 
         # # INSERT PARAMS
         cursor.execute(
-            """INSERT INTO trading_history(exchange, timestamp, order_id, quote_asset, base_asset, 
+            """INSERT INTO trading_history(exchange, timestamp, order_id, quote_asset, base_asset,
         base_quantity, quote_quantity, side, order_type, order_status, time_in_force, commission, commission_asset,
         self_trade_prevention_mode) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
@@ -98,7 +98,7 @@ class TradeHistoryDBClient:
         return 0
 
     @classmethod
-    def fetch_trading_history(cls, date_from: str = None, date_to: str = None):
+    def fetch_trading_history(cls, date_from: str | None = None, date_to: str | None = None):
         conn = sqlite3.connect(cls.DB_PATH)
         cursor = conn.cursor()
 

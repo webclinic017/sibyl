@@ -26,25 +26,25 @@
 
 [//]: # (<br>)
 
-Welcome to **Sibyl**! This application is your centralized hub for all things crypto. With Sibyl, you can connect multiple crypto exchange accounts, deploy smart trading strategies, and access a wide range of AI-powered tools—all within a secure, locally deployed environment.
+Welcome to **Sibyl**! This application is your centralized hub for all things crypto. With Sibyl, you can connect multiple crypto exchange accounts, deploy smart trading strategies, and access a wide range of AI-powered tools, all within a secure, locally deployed environment.
 
 ## Key Features
 
 ### Interactive Dashboard UI
-The intuitive dashboard provides a comprehensive view of your crypto activities. Manage your trading strategies, analyze market trends, and keep an eye on the latest news—all in one place.
+The intuitive dashboard provides a comprehensive view of your crypto activities. Manage your trading strategies, analyze market trends, and keep an eye on the latest news, all in one place.
 
 ---
 
 ### AI Agents & LLMs that power each Sibyl functionality - Oracle Module 🔥
 **Oracle** is the LLM-driven intelligence layer of *Sibyl*.
-Wherever you navigate in Sibyl, Oracle is there — ready to assist, explain, advise or spark new insights.
+Wherever you navigate in Sibyl, Oracle is there, ready to assist, explain, advise or spark new insights.
 With a single click, you activate a powerful AI agent that understands your context and delivers real-time intelligence, from market sentiment analysis to data explanations, crypto education, and strategy suggestions and more.
 
 - **Context-Aware Assistant**  
-  Oracle adapts to each section of Sibyl — whether you're analyzing a token, reading market news, launching a strategy or reviewing your trades.
+  Oracle adapts to each section of Sibyl, whether you're analyzing a token, reading market news, launching a strategy or reviewing your trades.
 
 - **Natural Language Interaction**  
-  Ask questions, get summaries or explore crypto concepts with simple text — no jargon required.
+  Ask questions, get summaries or explore crypto concepts with simple text, no jargon required.
 
 - **Real-Time Reasoning**  
   Powered by **locally deployed** or **API** LLMs, Oracle can synthesize multiple sources of information, extract insights, and provide actionable suggestions.
@@ -54,12 +54,22 @@ With a single click, you activate a powerful AI agent that understands your cont
 
 ---
 
+### Connected Crypto Exchange Overview - Wallet Module 💰
+
+This is the landing page of Sibyl.
+Get an overview of the status of connected Crypto Exchanges, including balances, positions, and recent trades.
+
+![wallet_ui](https://raw.githubusercontent.com/nMaroulis/sibyl/refs/heads/main/assets/gifs/wallet_ui.gif)
+
+
+---
+
 ### Strategy Planning - Broker Module 🎯
 Tune and deploy trading strategies and monitor their performance through a real-time UI:
 
 #### Option 1 - Sibyl Trading Engine
 
-A custom trading engine written in Python, supporting BUY, SELL orders and Backtesting.
+A **`custom trading engine`** written in Python, supporting BUY, SELL orders and Backtesting.
 
 - Currently supported trading algorithms:
   - Generic strategy algorithms: Bollinger Bands, RSI and EMA crossover

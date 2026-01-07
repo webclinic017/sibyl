@@ -4,9 +4,9 @@ import sqlite3
 from dotenv import load_dotenv
 
 """
-This script uses the sqlite3 module to connect to an SQLite database file called frontend.db. 
-It creates a table named "user_configuration" with the specified fields: 
-exchange, llm_source, llm_type, llm_name, backend_server_ip, backend_server_port and backend_server_secure. 
+This script uses the sqlite3 module to connect to an SQLite database file called frontend.db.
+It creates a table named "user_configuration" with the specified fields:
+exchange, llm_source, llm_type, llm_name, backend_server_ip, backend_server_port and backend_server_secure.
 The table has an additional primary key field called id for unique identification of each record.
 """
 
@@ -89,13 +89,13 @@ def fetch_llm_config() -> dict | None:
 
 
 def update_fields(
-    exchange: str = None,
-    llm_source: str = None,
-    llm_type: str = None,
-    llm_name: str = None,
-    backend_server_ip: str = None,
-    backend_server_port: int = None,
-    backend_server_secure: int = None,
+    exchange: str | None = None,
+    llm_source: str | None = None,
+    llm_type: str | None = None,
+    llm_name: str | None = None,
+    backend_server_ip: str | None = None,
+    backend_server_port: int | None = None,
+    backend_server_secure: int | None = None,
 ) -> int:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()

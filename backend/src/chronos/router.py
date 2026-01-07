@@ -15,7 +15,7 @@ router = APIRouter(
 def get_btc_forecast(
     asset: str = Query(description="Asset symbol like BTC or ETH"),
     interval: str = Query(),
-    forecast_window: int = None,
+    forecast_window: int | None = None,
 ) -> PricePredictionResponse:
     try:
         client = Chronos()

@@ -9,7 +9,7 @@ from frontend.src.utils.wallet_helper.client import (
 )
 
 
-def fetch_and_parse_spot_balance(exchange: str, quote_pair_asset: str = None) -> pd.DataFrame | None:
+def fetch_and_parse_spot_balance(exchange: str, quote_pair_asset: str | None = None) -> pd.DataFrame | None:
     icon_dict = {
         "BTC": "https://cloudfront-us-east-1.images.arcpublishing.com/coindesk/S3ODTTWSMFCFTJZD3K5K5OX5HI.png",
         "ETH": "https://cloudfront-us-east-1.images.arcpublishing.com/coindesk/ZJZZK5B2ZNF25LYQHMUTBTOMLU.png",
@@ -53,7 +53,7 @@ def fetch_and_parse_spot_balance(exchange: str, quote_pair_asset: str = None) ->
         return None
 
 
-def get_spot_balance_wallet_table(exchange: str, quote_pair_asset: str = None) -> None:
+def get_spot_balance_wallet_table(exchange: str, quote_pair_asset: str | None = None) -> None:
     with st.spinner("Fetching Wallet Balance Information..."):
         df = fetch_and_parse_spot_balance(exchange, quote_pair_asset)
         if df is not None:
@@ -116,7 +116,7 @@ def get_spot_balance_wallet_table(exchange: str, quote_pair_asset: str = None) -
                     font-weight: bold;
                 }}
             </style>
-        
+
             <div class="wallet-container">
                 <div class="wallet-title">SPOT Balance</div>
                 <table class="wallet-table">
@@ -163,7 +163,7 @@ def get_spot_balance_wallet_table(exchange: str, quote_pair_asset: str = None) -
             )
 
 
-def get_pie_chart(exchange: str, quote_pair_asset: str = None) -> None:
+def get_pie_chart(exchange: str, quote_pair_asset: str | None = None) -> None:
     df = fetch_and_parse_spot_balance(exchange, quote_pair_asset)
     if df is not None:
         pie_chart_labels = []
@@ -177,8 +177,8 @@ def get_pie_chart(exchange: str, quote_pair_asset: str = None) -> None:
             sorted_pairs = sorted(label_value_pairs, key=lambda x: x[1], reverse=True)
             top_n_pairs = sorted_pairs[:10]
             top_n_labels, top_n_values = zip(*top_n_pairs, strict=False)
-            top_n_labels = top_n_labels + ("Other",)
-            top_n_values = top_n_values + (sum(pie_chart_values) - sum(top_n_values),)
+            top_n_labels = (*top_n_labels, "Other")
+            top_n_values = (*top_n_values, sum(pie_chart_values) - sum(top_n_values))
         else:
             top_n_labels, top_n_values = pie_chart_labels, pie_chart_values
 
@@ -194,15 +194,15 @@ def get_pie_chart(exchange: str, quote_pair_asset: str = None) -> None:
         )
         fig.update_layout(margin=go.layout.Margin(t=20))
         fig.update_layout(
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1,
-            )
+            legend={
+                "orientation": "h",
+                "yanchor": "bottom",
+                "y": 1.02,
+                "xanchor": "right",
+                "x": 1,
+            }
         )  # , margin=dict(l=20, t=20, r=20, b=0)
-        st.plotly_chart(fig, config=dict(displayModeBar=False), use_container_width=True)
+        st.plotly_chart(fig, config={"displayModeBar": False}, use_container_width=True)
         st.html('<p style="text-align:center;font-size:5;color:grey">A maximum of 10 Assets can be displayed.</p>')
 
 
@@ -215,116 +215,119 @@ def get_logo_header() -> None:
 def get_account_information(exchange: str) -> None:
     # Sample Binance commission data
     data = fetch_account_information(exchange)
+    if data:
+        # HTML & CSS for stylish UI
+        html_code = f"""
+        <style>
+            .exchange-card {{
+                max-width: 100%;
+                padding: 20px;
+                background: linear-gradient(135deg, #1e1e1e, #262626);
+                border-radius: 15px;
+                box-shadow: 0px 4px 15px rgba(255, 215, 0, 0.3);
+                font-family: 'Arial', sans-serif;
+                color: #f0f0f0;
+                text-align: left;
+                margin: auto;
+            }}
+            .exchange-header {{
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                padding-bottom: 10px;
+                border-bottom: 2px solid rgba(255, 215, 0, 0.6);
+            }}
+            .commission-item {{
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                font-size: 16px;
+            }}
+            .label {{
+                font-weight: bold;
+                color: #FFD700;
+            }}
+            .value {{
+                color: #f0f0f0;
+            }}
+            .trade-status {{
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                font-size: 16px;
+            }}
+            .status-true {{
+                color: #32CD32; /* Green */
+                font-weight: bold;
+            }}
+            .status-false {{
+                color: #FF4500; /* Red */
+                font-weight: bold;
+            }}
+        </style>
 
-    # HTML & CSS for stylish UI
-    html_code = f"""
-    <style>
-        .exchange-card {{
-            max-width: 100%;
-            padding: 20px;
-            background: linear-gradient(135deg, #1e1e1e, #262626);
-            border-radius: 15px;
-            box-shadow: 0px 4px 15px rgba(255, 215, 0, 0.3);
-            font-family: 'Arial', sans-serif;
-            color: #f0f0f0;
-            text-align: left;
-            margin: auto;
-        }}
-        .exchange-header {{
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(255, 215, 0, 0.6);
-        }}
-        .commission-item {{
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            font-size: 16px;
-        }}
-        .label {{
-            font-weight: bold;
-            color: #FFD700;
-        }}
-        .value {{
-            color: #f0f0f0;
-        }}
-        .trade-status {{
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            font-size: 16px;
-        }}
-        .status-true {{
-            color: #32CD32; /* Green */
-            font-weight: bold;
-        }}
-        .status-false {{
-            color: #FF4500; /* Red */
-            font-weight: bold;
-        }}
-    </style>
+        <div class="exchange-card">
+            <div class="exchange-header">{exchange} Account Info</div>
+            <div class="commission-item">
+                <span class="label">Maker Commission:</span>
+                <span class="value">{data["maker_commission"]} %</span>
+            </div>
+            <div class="commission-item">
+                <span class="label">Taker Commission:</span>
+                <span class="value">{data["taker_commission"]} %</span>
+            </div>
+            <div class="commission-item">
+                <span class="label">Buyer Commission:</span>
+                <span class="value">{data["buyer_commission"]} %</span>
+            </div>
+            <div class="commission-item">
+                <span class="label">Seller Commission:</span>
+                <span class="value">{data["seller_commission"]} %</span>
+            </div>
+            <div class="trade-status">
+                <span class="label">Can Trade:</span>
+                <span class="{"status-true" if data["can_trade"] else "status-false"}">{"✔ Yes" if data["can_trade"] else "✖ No"}</span>
+            </div>
+            <div class="trade-status">
+                <span class="label">Can Deposit:</span>
+                <span class="{"status-true" if data["can_deposit"] else "status-false"}">{"✔ Yes" if data["can_deposit"] else "✖ No"}</span>
+            </div>
+            <div class="trade-status">
+                <span class="label">Can Withdraw:</span>
+                <span class="{"status-true" if data["can_withdraw"] else "status-false"}">{"✔ Yes" if data["can_withdraw"] else "✖ No"}</span>
+            </div>
+        </div>
+        """
 
-    <div class="exchange-card">
-        <div class="exchange-header">{exchange} Account Info</div>
-        <div class="commission-item">
-            <span class="label">Maker Commission:</span>
-            <span class="value">{data["maker_commission"]} %</span>
-        </div>
-        <div class="commission-item">
-            <span class="label">Taker Commission:</span>
-            <span class="value">{data["taker_commission"]} %</span>
-        </div>
-        <div class="commission-item">
-            <span class="label">Buyer Commission:</span>
-            <span class="value">{data["buyer_commission"]} %</span>
-        </div>
-        <div class="commission-item">
-            <span class="label">Seller Commission:</span>
-            <span class="value">{data["seller_commission"]} %</span>
-        </div>
-        <div class="trade-status">
-            <span class="label">Can Trade:</span>
-            <span class="{"status-true" if data["can_trade"] else "status-false"}">{"✔ Yes" if data["can_trade"] else "✖ No"}</span>
-        </div>
-        <div class="trade-status">
-            <span class="label">Can Deposit:</span>
-            <span class="{"status-true" if data["can_deposit"] else "status-false"}">{"✔ Yes" if data["can_deposit"] else "✖ No"}</span>
-        </div>
-        <div class="trade-status">
-            <span class="label">Can Withdraw:</span>
-            <span class="{"status-true" if data["can_withdraw"] else "status-false"}">{"✔ Yes" if data["can_withdraw"] else "✖ No"}</span>
-        </div>
-    </div>
-    """
+        st.html(html_code)
+    else:
+        st.html("<div>No Maker-Taker Fees & BPS information available.</div>")
 
-    st.html(html_code)
     with st.popover("What are these information?", icon=":material/contact_support:"):
         instructions_markdown = """
-            ## 📌 Understanding Maker-Taker Fees & BPS  
-            
-            ### 🎯 What Are Maker & Taker Fees?  
-            
-            In cryptocurrency exchanges like Binance, trading fees are typically categorized as **maker** or **taker** fees:  
-            
-            - **Maker Fee** 🏗️: Applies when you add liquidity to the order book (e.g., placing a limit order that isn’t immediately matched).  
-            - **Taker Fee** ⚡: Applies when you remove liquidity from the order book (e.g., placing a market order that gets executed instantly).  
-            
-            💡 **Key Difference:**  
-            - Makers help **stabilize** prices by adding orders, often receiving lower fees.  
-            - Takers provide **instant** transactions but pay higher fees.  
-            
+            ## 📌 Understanding Maker-Taker Fees & BPS
+
+            ### 🎯 What Are Maker & Taker Fees?
+
+            In cryptocurrency exchanges like Binance, trading fees are typically categorized as **maker** or **taker** fees:
+
+            - **Maker Fee** 🏗️: Applies when you add liquidity to the order book (e.g., placing a limit order that isn’t immediately matched).
+            - **Taker Fee** ⚡: Applies when you remove liquidity from the order book (e.g., placing a market order that gets executed instantly).
+
+            💡 **Key Difference:**
+            - Makers help **stabilize** prices by adding orders, often receiving lower fees.
+            - Takers provide **instant** transactions but pay higher fees.
+
             ---
-            
-            ### 📉 What Does BPS (Basis Points) Mean?  
-            
-            BPS, or **basis points**, is a unit used to describe **percentage-based fees** in finance and trading.  
-            - **1 BPS = 0.01%**  
-            - **100 BPS = 1%**  
-            
-            #### 🔢 Example:  
-            If a trading fee is **10 BPS**, it means:  
+
+            ### 📉 What Does BPS (Basis Points) Mean?
+
+            BPS, or **basis points**, is a unit used to describe **percentage-based fees** in finance and trading.
+            - **1 BPS = 0.01%**
+            - **100 BPS = 1%**
+
+            #### 🔢 Example:
+            If a trading fee is **10 BPS**, it means:
             ```math
             10 BPS = 10 × 0.01% = 0.10% fee per trade
         """
@@ -332,21 +335,21 @@ def get_account_information(exchange: str) -> None:
 
 
 def show_connected_exchanges():
-    html_text = """    
+    html_text = """
     <style>
       .exchlist-wrapper {
         padding: 1rem;
         border-radius: 12px;
         max-width: 100%;
       }
-    
+
       .exchlist-grid {
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
         justify-content: start;
       }
-    
+
       .exchlist-card {
         display: flex;
         align-items: center;
@@ -359,13 +362,13 @@ def show_connected_exchanges():
         box-sizing: border-box;
         cursor: pointer;
       }
-    
+
       .exchlist-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         filter: brightness(1.08);
       }
-    
+
       .exchlist-avatar {
         width: 44px;
         height: 44px;
@@ -375,41 +378,41 @@ def show_connected_exchanges():
         border: 2px solid rgba(255, 255, 255, 0.5);
         background-color: rgba(255, 255, 255, 0.3);
       }
-    
+
       .exchlist-text {
         display: flex;
         flex-direction: column;
       }
-    
+
       .exchlist-name {
         font-weight: 600;
         font-size: 1rem;
       }
-    
+
       .exchlist-status {
         font-size: 0.85rem;
         opacity: 0.9;
       }
-    
+
       /* Status card backgrounds */
       .exchlist-status-active {
         background: linear-gradient(135deg, #10b981, #34d399);
       }
-    
+
       .exchlist-status-notconnected {
         background: linear-gradient(135deg, #fbbf24, #fcd34d);
         color: #1f2937;
       }
-    
+
       .exchlist-status-unavailable {
         background: linear-gradient(135deg, #6b7280, #9ca3af);
       }
-    
+
       .exchlist-status-invalid {
         background: linear-gradient(135deg, #ef4444, #f87171);
       }
     </style>
-    
+
     """
 
     html_text += """

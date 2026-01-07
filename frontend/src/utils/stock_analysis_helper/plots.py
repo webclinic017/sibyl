@@ -82,8 +82,8 @@ def risk_gauge(risk):
         str(risk),
         xytext=(0, 0),
         xy=(tick_dict[risk], 2.1),
-        arrowprops=dict(arrowstyle="wedge, tail_width=0.5", color="#3b444b", shrinkA=0),
-        bbox=dict(boxstyle="circle", facecolor="#3b444b", linewidth=2.0),
+        arrowprops={"arrowstyle": "wedge, tail_width=0.5", "color": "#3b444b", "shrinkA": 0},
+        bbox={"boxstyle": "circle", "facecolor": "#3b444b", "linewidth": 2.0},
         fontsize=100,
         color="white",
         ha="center",
@@ -106,7 +106,7 @@ def linear_gauge_chart(recommendation: float):
     cmap = cm.Spectral_r
     norm = colors.Normalize(vmin=bounds[0], vmax=bounds[-1])
 
-    cb = colorbar.ColorbarBase(
+    colorbar.ColorbarBase(
         ax,
         cmap=cmap,
         norm=norm,

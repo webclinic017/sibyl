@@ -39,15 +39,15 @@ def get_llm_advice(
         stock_json = stock_json["data"]["info"]
 
         stock_text = f"""52 Week High: ${stock_json.get("fiftyTwoWeekHigh", "N/A")}, 52 Week Low: ${stock_json.get("fiftyTwoWeekLow", "N/A")},
-         Target Mean Price: ${stock_json.get("targetMeanPrice", "N/A")}, Overall risk: {stock_json.get("overallRisk")}, Audit risk: {stock_json.get("auditRisk")}, 
-         Board risk: {stock_json.get("boardRisk")}, Compensation risk: {stock_json.get("compensationRisk")}, Shareholder risk: {stock_json.get("shareHolderRightsRisk")}, 
-         Yahoo Finance Analyst Opinions: {stock_json.get("numberOfAnalystOpinions", "N/A")} 
+         Target Mean Price: ${stock_json.get("targetMeanPrice", "N/A")}, Overall risk: {stock_json.get("overallRisk")}, Audit risk: {stock_json.get("auditRisk")},
+         Board risk: {stock_json.get("boardRisk")}, Compensation risk: {stock_json.get("compensationRisk")}, Shareholder risk: {stock_json.get("shareHolderRightsRisk")},
+         Yahoo Finance Analyst Opinions: {stock_json.get("numberOfAnalystOpinions", "N/A")}
          Analysts generated the following recommendation {stock_json.get("recommendationKey", "N/A")} with a score of {stock_json.get("recommendationMean", "N/A")}."""
 
         prompt = f"""
             You are a financial expert. Analyze the following stock information and determine if it's a good investment for short-term and long-term.
             Stock Data:
-            {stock_text} 
+            {stock_text}
             Provide a brief evaluation, brief reasoning, and a confidence score (0 to 100).
             """
 

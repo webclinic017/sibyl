@@ -25,7 +25,7 @@ def plot_forecast(coin: str, interval: str, forecast_samples: int) -> None:
                 y=df[0:limit]["price"],
                 mode="lines",
                 name="Actual",
-                line=dict(color="blue", width=2),
+                line={"color": "blue", "width": 2},
             )
         )
 
@@ -35,13 +35,17 @@ def plot_forecast(coin: str, interval: str, forecast_samples: int) -> None:
                 y=df[limit - 1 : -1]["price"],
                 mode="lines+markers",
                 name="Prediction",
-                line=dict(color="rgba(255, 165, 0, 0.8)", width=2, shape="spline"),  # Smooth curve with transparency
-                marker=dict(
-                    size=6,
-                    color="orange",
-                    symbol="circle",
-                    line=dict(width=2, color="black"),
-                ),
+                line={
+                    "color": "rgba(255, 165, 0, 0.8)",
+                    "width": 2,
+                    "shape": "spline",
+                },  # Smooth curve with transparency
+                marker={
+                    "size": 6,
+                    "color": "orange",
+                    "symbol": "circle",
+                    "line": {"width": 2, "color": "black"},
+                },
             )
         )  # Gradient-like effect
         fig.update_layout(

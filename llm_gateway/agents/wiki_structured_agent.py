@@ -60,11 +60,11 @@ class WikiStructuredAgent(AgentBase):
         # TOOLS
         # ========================
         web_search = WebSearchTool(max_results=5)
-        web_search_tool = web_search.as_langchain_tool()
+        web_search.as_langchain_tool()
 
         load_dotenv("database/db_paths.env")
         self.vectorstore_path = os.getenv("WIKI_VECTORSTORE_PATH")
-        doc_retriever = DocumentRetrieverTool(
+        DocumentRetrieverTool(
             persist_directory=self.vectorstore_path,
             collection_name="crypto_knowledge",
             threshold=0.5,
@@ -246,7 +246,7 @@ class WikiStructuredAgent(AgentBase):
         """
 
         state = {"messages": [], "message_type": None}
-        state["messages"] = state.get("messages", []) + [{"role": "user", "content": query}]
+        state["messages"] = [*state.get("messages", []), {"role": "user", "content": query}]
 
         # state: State = {
         #     "messages": [{"role": "user", "content": query}],

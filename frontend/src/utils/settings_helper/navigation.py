@@ -82,7 +82,7 @@ PRICE_API = {
 
 def show_status_cards(only_exchange: bool = False) -> None:
     status_json = fetch_apis_status("all")
-    status_list = list(status_json.values())
+    list(status_json.values())
     # EXCHANGE APIS
     global CRYPTO_APIS
     status_card_style()
@@ -133,7 +133,7 @@ def show_homepage_status_cards() -> None:
         "https://mdevelopers.com/storage/backend1_a9b6dc2f.png",
         statuses[0],
     )
-    for k, v in CRYPTO_APIS.items():
+    for _k, v in CRYPTO_APIS.items():
         html_txt += status_card(v[0], v[1], statuses[i])
         i += 1
     html_txt += """</div>"""
@@ -178,18 +178,18 @@ def show_homepage_status_cards_alt() -> None:
       transition: all 300ms;
       display:inline-block;
     }
-    
+
     .article-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
     }
-    
+
     .article-card img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    
+
     .article-card .content {
       box-sizing: border-box;
       width: 100%;
@@ -199,18 +199,18 @@ def show_homepage_status_cards_alt() -> None:
       top: 0;
       background: linear-gradient(rgba(0, 0, 0, 0.8), transparent);
     }
-    
+
     .article-card .date,
     .article-card .title {
       margin: 0;
     }
-    
+
     .article-card .date {
       font-size: 10px;
       color: rgba(255, 255, 255, 0.9);
       margin-bottom: 1px;
     }
-    
+
     .article-card .title {
       font-size: 12px;
       color: #fff;

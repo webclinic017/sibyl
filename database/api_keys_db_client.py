@@ -37,8 +37,8 @@ class APIEncryptedDatabase:
             self,
             name: str,
             api_key: str,
-            secret_key: str = None,
-            api_metadata: str = None,
+            secret_key: str | None = None,
+            api_metadata: str | None = None,
         ):
             self.name = name
             self.api_key = APIEncryptedDatabase.cipher.encrypt(api_key.encode()).decode()
@@ -89,7 +89,7 @@ class APIEncryptedDatabase:
             print("APIEncryptedDatabase :: ✅ Database initialized.")
 
     @classmethod
-    def insert_api_key(cls, name: str, api_key: str, secret_key: str = None, api_metadata: str = None):
+    def insert_api_key(cls, name: str, api_key: str, secret_key: str | None = None, api_metadata: str | None = None):
         """Inserts a new API key into the database."""
         session = cls.Session()
         if session.query(cls.APIKeyStore).filter_by(name=name).first():
@@ -133,9 +133,9 @@ class APIEncryptedDatabase:
     def update_api_key(
         cls,
         name: str,
-        new_api_key: str = None,
-        new_secret_key: str = None,
-        new_metadata: str = None,
+        new_api_key: str | None = None,
+        new_secret_key: str | None = None,
+        new_metadata: str | None = None,
     ):
         """Updates an existing API key by name."""
         session = cls.Session()

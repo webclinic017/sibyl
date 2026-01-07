@@ -57,7 +57,7 @@ def real_time_strategy_plot(df: pd.DataFrame, strategy_id: str, time_interval: s
             x=df[df["order"] == "BUY"]["timestamp"],
             y=df[df["order"] == "BUY"]["price"],
             mode="markers",
-            marker=dict(color="green", size=12, symbol="triangle-up"),
+            marker={"color": "green", "size": 12, "symbol": "triangle-up"},
             name="BUY",
         )
     )
@@ -66,7 +66,7 @@ def real_time_strategy_plot(df: pd.DataFrame, strategy_id: str, time_interval: s
             x=df[df["order"] == "SELL"]["timestamp"],
             y=df[df["order"] == "SELL"]["price"],
             mode="markers",
-            marker=dict(color="red", size=12, symbol="triangle-down"),
+            marker={"color": "red", "size": 12, "symbol": "triangle-down"},
             name="SELL",
         )
     )
@@ -76,7 +76,7 @@ def real_time_strategy_plot(df: pd.DataFrame, strategy_id: str, time_interval: s
                 x=df[df["order"] == "INVALID_BUY"]["timestamp"],
                 y=df[df["order"] == "INVALID_BUY"]["price"],
                 mode="markers",
-                marker=dict(color="green", size=10, symbol="triangle-up-open"),
+                marker={"color": "green", "size": 10, "symbol": "triangle-up-open"},
                 name="Invalid BUY",
             )
         )
@@ -85,7 +85,7 @@ def real_time_strategy_plot(df: pd.DataFrame, strategy_id: str, time_interval: s
                 x=df[df["order"] == "INVALID_SELL"]["timestamp"],
                 y=df[df["order"] == "INVALID_SELL"]["price"],
                 mode="markers",
-                marker=dict(color="red", size=10, symbol="triangle-down-open"),
+                marker={"color": "red", "size": 10, "symbol": "triangle-down-open"},
                 name="Invalid SELL",
             )
         )
@@ -145,7 +145,7 @@ def static_strategy_plot(df: pd.DataFrame, show_invalid: bool, show_slippage: bo
             x=buy_df["timestamp"],
             y=buy_df["price"],
             mode="markers",
-            marker=dict(color="green", size=13, symbol="triangle-up"),
+            marker={"color": "green", "size": 13, "symbol": "triangle-up"},
             name="BUY",
         )
     )
@@ -157,9 +157,11 @@ def static_strategy_plot(df: pd.DataFrame, show_invalid: bool, show_slippage: bo
             x=sell_df["timestamp"],
             y=sell_df["price"],
             mode="markers",
-            marker=dict(
-                color="red", size=13, symbol="triangle-down"
-            ),  #  marker=dict(color='#ff0000', opacity=0.6,symbol="diamond", size=10, line=dict(color='#ae0000', width=2)),
+            marker={
+                "color": "red",
+                "size": 13,
+                "symbol": "triangle-down",
+            },  #  marker=dict(color='#ff0000', opacity=0.6,symbol="diamond", size=10, line=dict(color='#ae0000', width=2)),
             name="SELL",
         )
     )
@@ -177,9 +179,11 @@ def static_strategy_plot(df: pd.DataFrame, show_invalid: bool, show_slippage: bo
                 x=executed_buy_df["timestamp"],
                 y=executed_buy_df["executed_price"],
                 mode="markers",
-                marker=dict(
-                    color="orange", size=10, symbol="star-triangle-up-open"
-                ),  # df["slippage"].apply(lambda x: 'blue' if x > 0 else ('orange' if x < 0 else 'gray'))
+                marker={
+                    "color": "orange",
+                    "size": 10,
+                    "symbol": "star-triangle-up-open",
+                },  # df["slippage"].apply(lambda x: 'blue' if x > 0 else ('orange' if x < 0 else 'gray'))
                 name="Intended BUY Price",
             )
         )
@@ -189,7 +193,7 @@ def static_strategy_plot(df: pd.DataFrame, show_invalid: bool, show_slippage: bo
                 x=executed_sell_df["timestamp"],
                 y=executed_sell_df["executed_price"],
                 mode="markers",
-                marker=dict(color="purple", size=10, symbol="star-triangle-down-open"),
+                marker={"color": "purple", "size": 10, "symbol": "star-triangle-down-open"},
                 name="Intended SELL Price",
             )
         )
@@ -201,7 +205,7 @@ def static_strategy_plot(df: pd.DataFrame, show_invalid: bool, show_slippage: bo
                     x=[row["timestamp"], row["timestamp"]],
                     y=[row["price"], row["executed_price"]],
                     mode="lines",
-                    line=dict(color="orange", dash="dot"),
+                    line={"color": "orange", "dash": "dot"},
                     showlegend=False,
                 )
             )
@@ -212,7 +216,7 @@ def static_strategy_plot(df: pd.DataFrame, show_invalid: bool, show_slippage: bo
                     x=[row["timestamp"], row["timestamp"]],
                     y=[row["price"], row["executed_price"]],
                     mode="lines",
-                    line=dict(color="purple", dash="dot"),
+                    line={"color": "purple", "dash": "dot"},
                     showlegend=False,
                 )
             )
@@ -224,7 +228,7 @@ def static_strategy_plot(df: pd.DataFrame, show_invalid: bool, show_slippage: bo
                 x=invalid_buy_df["timestamp"],
                 y=invalid_buy_df["price"],
                 mode="markers",
-                marker=dict(color="green", size=10, symbol="triangle-up-open"),
+                marker={"color": "green", "size": 10, "symbol": "triangle-up-open"},
                 name="Invalid BUY",
             )
         )
@@ -235,7 +239,7 @@ def static_strategy_plot(df: pd.DataFrame, show_invalid: bool, show_slippage: bo
                 x=invalid_sell_df["timestamp"],
                 y=invalid_sell_df["price"],
                 mode="markers",
-                marker=dict(color="red", size=10, symbol="triangle-down-open"),
+                marker={"color": "red", "size": 10, "symbol": "triangle-down-open"},
                 name="Invalid SELL",
             )
         )
@@ -413,7 +417,7 @@ def show_active_strategy_count(active_strategies: int, total_strategies: int):
     </style>
 
     <div class="strategy_count_container">
-        There are 
+        There are
         <span class="sc_number">
             <span class="green-circle"></span> {active_strategies}
         </span>
@@ -442,28 +446,28 @@ def strategy_plot_info() -> None:
         font-size: 14px;
         display: inline-block; /* Ensures it stays in the same line */
       }
-    
+
       .triangle_sell {
         -webkit-text-stroke: 2px red;
         color: red;
         font-size: 14px;
         display: inline-block; /* Ensures it stays in the same line */
       }
-      
+
       .triangle_buy_invalid {
         -webkit-text-stroke: 2px green;
         color: transparent;
         font-size: 14px;
         display: inline-block; /* Keeps it inline */
       }
-      
+
       .triangle_sell_invalid {
         -webkit-text-stroke: 2px red;
         color: transparent;
         font-size: 14px;
         display: inline-block; /* Ensures it stays in the same line */
       }
-      
+
     .triangle_buy_slippage {
         -webkit-text-stroke: 1px orange;
         color: transparent;
@@ -479,19 +483,19 @@ def strategy_plot_info() -> None:
       }
 
     </style>
-    
-    <p style="font-size:15px; font-weight: 500; margin-bottom:0.2rem;">&#x2022; The lineplot shows the price over time from the initiation time of the strategy along with markers indicating 
-        <span class="triangle_buy">&#9650;</span> <strong>BUY</strong> and 
+
+    <p style="font-size:15px; font-weight: 500; margin-bottom:0.2rem;">&#x2022; The lineplot shows the price over time from the initiation time of the strategy along with markers indicating
+        <span class="triangle_buy">&#9650;</span> <strong>BUY</strong> and
         <span class="triangle_sell">&#9660;</span> <strong>SELL</strong> orders that were placed by the strategy. </p>
     <p style="font-size:15px; font-weight: 500; margin-bottom:0.2rem;">&#x2022;
-        In case the signal is sent by the algorithm but the order fails, it will be denoted with 
-        <span class="triangle_buy_invalid">&#9650;</span> <strong>Invalid BUY</strong> and 
-        <span class="triangle_sell_invalid">&#9660;</span> <strong>Invalid SELL</strong>. The order might fail because the algorithm tried to perform 2 consecutive BUY or SELL orders, 
+        In case the signal is sent by the algorithm but the order fails, it will be denoted with
+        <span class="triangle_buy_invalid">&#9650;</span> <strong>Invalid BUY</strong> and
+        <span class="triangle_sell_invalid">&#9660;</span> <strong>Invalid SELL</strong>. The order might fail because the algorithm tried to perform 2 consecutive BUY or SELL orders,
         because the balance was not enough or something went wrong with the Exchange API order command.
     </p>
     <p style="font-size:15px; font-weight: 500;">&#x2022;
-        The plot can also indicate the <strong>slippage</strong>. The slippage marker shows how far off was the desired 
-        price that the strategy used to make the order decision from the actual executed price. The desired price for the BUY order is denoted with 
+        The plot can also indicate the <strong>slippage</strong>. The slippage marker shows how far off was the desired
+        price that the strategy used to make the order decision from the actual executed price. The desired price for the BUY order is denoted with
         <span class="triangle_buy_slippage">&#9650;</span> and for SELL order slippage <span class="triangle_sell_slippage">&#9660;</span>.
     </p>
     """)

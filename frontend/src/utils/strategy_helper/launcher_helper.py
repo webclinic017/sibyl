@@ -379,7 +379,7 @@ def strategy_params_form(strategy: str) -> dict[str, Any]:
             MACD: Provides signals based on the convergence or divergence of short-term and long-term trends.
             ATR: Measures volatility and can be used for position sizing and setting stop-losses.
             CMF: Indicates money flow into or out of the asset, helping assess whether there’s buying or selling pressure.
-            TSI: Focuses on momentum and trend strength, indicating whether the current trend is strong or weakening.         
+            TSI: Focuses on momentum and trend strength, indicating whether the current trend is strong or weakening.
             """)
 
         caption("**MACD**: Provides signals based on the convergence or divergence of short-term and long-term trends.")
@@ -587,28 +587,28 @@ def market_condition_explanation():
     with popover("How is it calculated?", icon=":material/contact_support:"):
         markdown("""
         ##📌 Market Condition Score Explanation
-        
+
         The Market Condition Score is a quantitative metric designed to assess the suitability of the current market for trading strategies. It evaluates four key aspects of market behavior:
-        
+
         1. **Trend Strength** 📈 – Measured using the Average Directional Index (ADX).
         2. **Volatility** 🌊 – Measured using Bollinger Bands Width (BB Width).
         3. **Momentum** 🚀 – Measured using the MACD Histogram (MACD Hist).
         4. **Overbought/Oversold Conditions** 🎭 – Measured using the Relative Strength Index (RSI).
-        
+
         The score ranges from 0 to 100, where:
         - **High values** (e.g., 70-100) indicate a favorable market for trading.
         - **Low values** (e.g., 0-30) suggest uncertain or unfavorable conditions.
         ----
         🔹 How the Score is Calculated
         The function retrieves historical candlestick data (K-lines) and computes the four indicators. The values are **normalized** and **weighted dynamically** based on trend strength.
-        
+
         Formula for Market Condition Score:
         """)
 
         latex(r"""
-        S = w_1 \cdot \min(50, \text{ADX}) + 
-            w_2 \cdot \min(50, \text{BB Width} \times 100) + 
-            w_3 \cdot \min(50, \max(-50, \text{MACD Hist} \times 100)) + 
+        S = w_1 \cdot \min(50, \text{ADX}) +
+            w_2 \cdot \min(50, \text{BB Width} \times 100) +
+            w_3 \cdot \min(50, \max(-50, \text{MACD Hist} \times 100)) +
             w_4 \cdot \min(50, 50 - |\text{RSI} - 50|)
         """)
 

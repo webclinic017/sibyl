@@ -109,7 +109,7 @@ class ExchangeAPIClient(ABC):
         pass
 
     @abstractmethod
-    def get_spot_balance(self, quote_asset_pair_price: str = None) -> dict[str, Any]:
+    def get_spot_balance(self, quote_asset_pair_price: str | None = None) -> dict[str, Any]:
         """
         Retrieve the user's spot balance, including free and locked amounts, along with current prices.
 
@@ -148,8 +148,8 @@ class ExchangeAPIClient(ABC):
         symbol: str,
         interval: str,
         limit: int,
-        start_time: int = None,
-        end_time: int = None,
+        start_time: int | None = None,
+        end_time: int | None = None,
     ) -> list[dict[str, float]] | None:
         """
         Fetches historical OHLCV data for a given symbol from the client.

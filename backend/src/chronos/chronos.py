@@ -74,7 +74,7 @@ class Chronos:
         prices = list(self.current_btc_price) + list(y_pred)
         result = []
         time_diff = len(self.current_btc_price)
-        for i, price in enumerate(prices):
+        for _i, price in enumerate(prices):
             result.append(
                 {
                     "date": (datetime.today() - timedelta(days=time_diff)).strftime("%Y-%m-%d"),

@@ -15,17 +15,17 @@ def status_card_style():
                 box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
                 transition: transform 1.5s ease;
             }
-            
+
             .settings-card-Act {
-                box-shadow: 0 10px 20px rgba(11, 66, 6, 0.6); 
+                box-shadow: 0 10px 20px rgba(11, 66, 6, 0.6);
                 transition: transform 0.6s ease;
             }
-            
+
             .settings-card-Inv {
-                box-shadow: 0 10px 20px rgba(205,92,92, 0.6); 
+                box-shadow: 0 10px 20px rgba(205,92,92, 0.6);
                 transition: transform 0.6s ease;
             }
-            
+
             .settings-card:hover {
                 transform: translateY(-5px); /* Added hover effect */
                 filter: brightness(1.3);
@@ -35,11 +35,11 @@ def status_card_style():
                   left: 200%;
                 }
             }
-            
+
             .settings-card-illustration {
                 margin: 8px;
             }
-            
+
             .settings-card-illustration img {
                 width: 100px;
                 height: 100px;
@@ -61,7 +61,7 @@ def status_card_style():
                 transition: .7s all;
               }
             */
-            
+
             .settings-card h3 {
                 font-size: 1.0rem;
                 line-height: 1.2rem;
@@ -69,7 +69,7 @@ def status_card_style():
                 font-weight: bold;
                 margin: 5px 0;
             }
-            
+
             .settings-card button {
                 font-size: 0.8rem;
                 font-weight: bold;
@@ -91,7 +91,7 @@ def status_card_style():
             .settings-card button:active {
                 transform: scale(0.9);
             }
-            
+
             .settings-card-Act button{
                 color: white;
                 background-color: #81c784;
@@ -101,12 +101,12 @@ def status_card_style():
                 color: white;
                 background-color: #DC143C;
             }
-            
+
             .settings-card-Ina button{
                 color: white;
                 background-color: #DC143C;
             }
-            
+
             .status_header {
                 display: flex;
                 align-items: center;
@@ -123,35 +123,35 @@ def status_card_style():
                 font-size: 21px;
                 color: #666;
             }
-            
+
             .settings-card-illustration-Kr img {
                 box-shadow: 0 10px 15px rgba(138,43,226, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .settings-card-illustration-Co img {
                 box-shadow: 0 10px 15px rgba(30,144,255, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .settings-card-illustration-Ba img {
                 box-shadow: 0 10px 15px rgba(30,144,255, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .settings-card-illustration-Op img {
                 box-shadow: 0 10px 15px rgba(95,158,160, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .settings-card-illustration-Ge img {
                 box-shadow: 0 10px 15px rgba(30,144,255, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .settings-card-illustration-Mo img {
                 box-shadow: 0 10px 15px rgba(0,0,0, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .settings-card-illustration-Lo img {
                 box-shadow: 0 10px 15px rgba(0,0,0, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .settings-card-illustration-An img {
                 box-shadow: 0 10px 15px rgba(227,199,161, 0.5);
             }
@@ -162,7 +162,7 @@ def status_card_style():
 
 
 def status_card_header(title: str):
-    html(f"""        
+    html(f"""
         <div class="status_header">
             <div class="status_line"></div>
             <div class="status_title">{title}</div>
@@ -223,28 +223,28 @@ def compact_card_style():
                 border-radius: 50%;
                 box-shadow: 0 5px 8px rgba(247, 228, 63, 0.4);
             }
-            
+
             .mini-card-shadow-Kr img {
                 box-shadow: 0 10px 15px rgba(138,43,226, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .mini-card-shadow-Co img {
                 box-shadow: 0 10px 15px rgba(30,144,255, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .mini-card-shadow-Ba img {
                 box-shadow: 0 10px 15px rgba(30,144,255, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .mini-card-shadow-Op img {
                 box-shadow: 0 10px 15px rgba(95,158,160, 0.5); /* Added shadow for 3D effect */
             }
-            
+
             .mini-card-shadow-Ge img {
                 box-shadow: 0 10px 15px rgba(30,144,255, 0.5); /* Added shadow for 3D effect */
             }
 
-            
+
             .mini-card h4 {
                 font-size: 0.7rem;
                 color: #444;
@@ -284,7 +284,7 @@ def compact_card_style():
 
 
 def compact_card_header(title: str):
-    html(f"""        
+    html(f"""
         <div class="mini-header">
             <hr class="mini-line"/>
             <div class="mini-title">{title}</div>

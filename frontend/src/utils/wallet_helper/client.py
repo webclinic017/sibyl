@@ -5,7 +5,7 @@ from frontend.config.config import BACKEND_SERVER_ADDRESS
 
 
 @cache_resource(ttl=7200, show_spinner=False)
-def fetch_account_spot(exchange: str, quote_asset_pair: str = None) -> dict | None:
+def fetch_account_spot(exchange: str, quote_asset_pair: str | None = None) -> dict | None:
     url = f"{BACKEND_SERVER_ADDRESS}/accountant/account/spot/balance?exchange={exchange.lower().replace(' ', '_')}"
     if quote_asset_pair:
         url += f"&quote_asset_pair={quote_asset_pair}"
