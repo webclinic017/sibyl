@@ -143,6 +143,8 @@ Stay informed with the Natural Language Processing (NLP) tools:
 - Sentiment analysis using advanced language models to gauge market mood
 - **Oracle**: LLM-powered chatbot, to ask questions about the latest crypto news.
 
+![reporter_ui](https://raw.githubusercontent.com/nMaroulis/sibyl/refs/heads/main/assets/gifs/reporter_ui.gif)
+
 ---
 
 ### Connect with Popular Exchanges - Technician Module 🛠️

@@ -75,7 +75,8 @@ def fetch_article_text(url: str) -> str:
     soup = BeautifulSoup(response.content, "html.parser")
 
     # Find the article content
-    article_content = soup.find("div", attrs="post__content-wrapper")  # Adjust based on website's structure
+    article_content = soup.find("div", class_="_html-renderer_mz5on_1 _html-renderer--with-lightbox_mz5on_10 ct-prose")
+
     if article_content:
         return article_content.get_text(strip=True)
     else:

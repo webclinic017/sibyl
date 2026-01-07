@@ -219,7 +219,7 @@ def get_news_summary(model: str, website: str = "cointelegraph"):
 
 def get_news_sentiment(model: str = "vader", website: str = "cointelegraph"):
     sentiment_score = fetch_news_sentiment()
-    if sentiment_score:
+    if sentiment_score is not None:
         # # GAUGE PLOT
         fig = Figure(
             Indicator(
